@@ -1,4 +1,4 @@
-// Password gate — Sweat-inspired dark theme
+// Password gate — light theme
 "use client";
 
 import { useState } from "react";
@@ -27,7 +27,7 @@ export default function PasswordGate({ onSuccess }: { onSuccess: () => void }) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center gradient-hero px-6">
+    <div className="min-h-screen flex items-center justify-center bg-[#F5F3F4] px-6">
       <form onSubmit={handleSubmit} className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="w-16 h-16 gradient-pink rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-[#FF1A66]/30">
@@ -35,17 +35,17 @@ export default function PasswordGate({ onSuccess }: { onSuccess: () => void }) {
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
             </svg>
           </div>
-          <h1 className="text-2xl font-extrabold text-white mb-1">Trainer Access</h1>
-          <p className="text-white/30 text-sm">Enter your password to manage workouts</p>
+          <h1 className="text-2xl font-extrabold text-[#1A0A1F] mb-1">Trainer Access</h1>
+          <p className="text-[#1A0A1F]/40 text-sm">Enter your password to manage workouts</p>
         </div>
 
-        <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-6">
+        <div className="bg-white rounded-2xl border border-black/5 shadow-sm p-6">
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
-            className="w-full px-4 py-3.5 bg-white/10 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-[#FF1A66] focus:border-transparent transition-all"
+            className="w-full px-4 py-3.5 bg-[#F5F3F4] border border-black/5 rounded-xl text-[#1A0A1F] placeholder-[#1A0A1F]/30 focus:outline-none focus:ring-2 focus:ring-[#FF1A66] focus:border-transparent transition-all"
             autoFocus
           />
 

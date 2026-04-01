@@ -133,10 +133,10 @@ export default function WorkoutPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center gradient-hero">
+      <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
           <div className="w-10 h-10 border-[3px] border-[#FF1A66] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-white/50 text-sm font-medium">Loading your workout...</p>
+          <p className="text-[#1A0A1F]/40 text-sm font-medium">Loading your workout...</p>
         </div>
       </div>
     );
@@ -144,11 +144,11 @@ export default function WorkoutPage() {
 
   if (error || !routine) {
     return (
-      <div className="min-h-screen flex items-center justify-center gradient-hero px-6">
+      <div className="min-h-screen flex items-center justify-center bg-white px-6">
         <div className="text-center max-w-xs">
           <span className="text-5xl block mb-4">💪</span>
-          <h1 className="text-2xl font-extrabold text-white mb-2">{error ? "Oops!" : "No Workout Yet"}</h1>
-          <p className="text-white/40">{error || "Your trainer hasn't published a routine yet."}</p>
+          <h1 className="text-2xl font-extrabold text-[#1A0A1F] mb-2">{error ? "Oops!" : "No Workout Yet"}</h1>
+          <p className="text-[#1A0A1F]/40">{error || "Your trainer hasn't published a routine yet."}</p>
         </div>
       </div>
     );
@@ -166,18 +166,18 @@ export default function WorkoutPage() {
       {showToast && <WorkoutToast newPBs={newPBs} onDismiss={() => setShowToast(false)} />}
 
       {/* Header */}
-      <header className="gradient-hero text-white pb-6">
+      <header className="bg-white border-b border-black/5 pb-6">
         <div className="max-w-2xl mx-auto px-5 pt-10 pb-2 flex items-start justify-between">
           <div>
             <p className="text-[#FF1A66] text-xs font-bold uppercase tracking-[0.2em] mb-2">
               {formatWeekRange(routine.weekStart)}
             </p>
-            <h1 className="text-3xl font-extrabold tracking-tight">My Workout</h1>
-            <p className="text-white/30 text-sm mt-1">{totalExercises} exercises this week</p>
+            <h1 className="text-3xl font-extrabold tracking-tight text-[#1A0A1F]">My Workout</h1>
+            <p className="text-[#1A0A1F]/30 text-sm mt-1">{totalExercises} exercises this week</p>
           </div>
           <Link
             href="/progress"
-            className="mt-2 flex items-center gap-1.5 bg-white/10 hover:bg-white/15 px-3.5 py-2 rounded-xl text-white/60 hover:text-white text-xs font-semibold transition-colors"
+            className="mt-2 flex items-center gap-1.5 bg-[#F5F3F4] hover:bg-[#EAE6E8] px-3.5 py-2 rounded-xl text-[#1A0A1F]/50 hover:text-[#1A0A1F] text-xs font-semibold transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
@@ -196,11 +196,11 @@ export default function WorkoutPage() {
               return (
                 <button key={day} onClick={() => { setSelectedDay(day); if (loggingMode) { setLoggingMode(false); setLogData({}); } }}
                   className={`relative flex flex-col items-center min-w-[50px] px-3 py-3 rounded-2xl transition-all flex-shrink-0 ${
-                    isSelected ? "bg-[#FF1A66] text-white shadow-lg shadow-[#FF1A66]/30" : "bg-white/8 text-white/50 hover:bg-white/12"
+                    isSelected ? "bg-[#FF1A66] text-white shadow-lg shadow-[#FF1A66]/30" : "bg-[#F5F3F4] text-[#1A0A1F]/40 hover:bg-[#EAE6E8]"
                   }`}>
-                  <span className={`text-[10px] uppercase tracking-wider mb-0.5 ${isSelected ? "text-white/80" : "text-white/30"}`}>{day.slice(0, 3)}</span>
+                  <span className={`text-[10px] uppercase tracking-wider mb-0.5 ${isSelected ? "text-white/80" : "text-[#1A0A1F]/25"}`}>{day.slice(0, 3)}</span>
                   <span className="text-lg font-bold">{count || "–"}</span>
-                  {isToday && !isSelected && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#FF1A66] rounded-full border-2 border-[#210826]" />}
+                  {isToday && !isSelected && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#FF1A66] rounded-full border-2 border-white" />}
                 </button>
               );
             })}

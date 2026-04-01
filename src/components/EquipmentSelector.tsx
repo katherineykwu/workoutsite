@@ -1,4 +1,4 @@
-// Equipment selector — dark theme for trainer dashboard
+// Equipment selector — light theme for trainer dashboard
 "use client";
 
 import { EQUIPMENT_OPTIONS } from "@/lib/types";
@@ -20,7 +20,7 @@ export default function EquipmentSelector({ selected, onChange }: EquipmentSelec
   return (
     <div>
       <p className="text-[#FF1A66] text-xs font-bold uppercase tracking-[0.15em] mb-2">Equipment</p>
-      <h3 className="text-lg font-bold text-white mb-4">Select what&apos;s needed this week</h3>
+      <h3 className="text-lg font-bold text-[#1A0A1F] mb-4">Select what&apos;s needed this week</h3>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
         {EQUIPMENT_OPTIONS.map((item) => {
           const isSelected = selected.includes(item.id);
@@ -31,8 +31,8 @@ export default function EquipmentSelector({ selected, onChange }: EquipmentSelec
               onClick={() => toggle(item.id)}
               className={`flex items-center gap-2.5 px-3.5 py-3.5 rounded-xl text-left transition-all text-sm font-medium ${
                 isSelected
-                  ? "bg-[#FF1A66]/15 text-[#FF1A66] ring-2 ring-[#FF1A66] shadow-sm shadow-[#FF1A66]/10"
-                  : "bg-white/5 border border-white/10 text-white/50 hover:bg-white/10"
+                  ? "bg-[#FF1A66]/10 text-[#FF1A66] ring-2 ring-[#FF1A66] shadow-sm"
+                  : "bg-[#F5F3F4] border border-black/5 text-[#1A0A1F]/60 hover:bg-[#EAE6E8]"
               }`}
             >
               <span className="text-xl flex-shrink-0">{item.icon}</span>

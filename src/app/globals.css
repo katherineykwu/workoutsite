@@ -26,11 +26,11 @@ body {
 
 /* Sweat-style gradients */
 .gradient-dark {
-  background: linear-gradient(160deg, #1A0A1F 0%, #2D1035 50%, #1A0A1F 100%);
+  background: #ffffff;
 }
 .gradient-pink {
   background: linear-gradient(135deg, #FF1A66 0%, #FF4D8A 100%);
 }
 .gradient-hero {
-  background: linear-gradient(160deg, #210826 0%, #3D1548 40%, #210826 100%);
+  background: #ffffff;
 }

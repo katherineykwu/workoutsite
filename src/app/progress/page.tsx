@@ -55,11 +55,11 @@ export default function ProgressPage() {
   return (
     <div className="min-h-screen bg-[#F5F3F4]">
       {/* Header */}
-      <header className="gradient-hero text-white">
+      <header className="bg-white border-b border-black/5">
         <div className="max-w-2xl mx-auto px-5 pt-10 pb-8">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-white/40 hover:text-white text-xs font-semibold mb-4 transition-colors"
+            className="inline-flex items-center gap-1.5 text-[#1A0A1F]/40 hover:text-[#1A0A1F] text-xs font-semibold mb-4 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -67,9 +67,9 @@ export default function ProgressPage() {
             Back to Workout
           </Link>
           <p className="text-[#FF1A66] text-xs font-bold uppercase tracking-[0.2em] mb-2">Analytics</p>
-          <h1 className="text-3xl font-extrabold tracking-tight">My Progress</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight text-[#1A0A1F]">My Progress</h1>
           {hasData && (
-            <p className="text-white/30 text-sm mt-1">
+            <p className="text-[#1A0A1F]/30 text-sm mt-1">
               {logs.length} workout{logs.length !== 1 ? "s" : ""} logged · {pbList.length} PR{pbList.length !== 1 ? "s" : ""}
             </p>
           )}
