@@ -62,3 +62,39 @@ export const DAYS_OF_WEEK = [
 ] as const;
 
 export type DayOfWeek = (typeof DAYS_OF_WEEK)[number];
+
+// ---- Workout Logging & Analytics ----
+
+// A single set that was actually performed
+export interface SetLog {
+  setNumber: number;
+  weight: number; // lbs
+  reps: number;   // actual reps completed
+}
+
+// One exercise within a completed workout
+export interface ExerciseLog {
+  exerciseId: string;
+  exerciseName: string; // saved at log time so history stays accurate even if trainer renames
+  sets: SetLog[];
+}
+
+// A completed workout session
+export interface WorkoutLog {
+  id: string;
+  date: string;        // ISO date e.g. "2026-04-01"
+  dayOfWeek: DayOfWeek;
+  routineId: string;
+  exercises: ExerciseLog[];
+  completedAt: number; // timestamp
+}
+
+// Personal best record for an exercise
+export interface PersonalBest {
+  exerciseName: string; // normalized lowercase for matching
+  displayName: string;  // original casing for display
+  weight: number;
+  reps: number;         // reps at that weight
+  date: string;
+  workoutLogId: string;
+}
