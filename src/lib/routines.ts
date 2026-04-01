@@ -64,5 +64,6 @@ export function createBlankRoutine(weekStart: string): Routine {
       Saturday: { exercises: [] },
       Sunday: { exercises: [] },
     },
+    equipment: [],
   };
 }

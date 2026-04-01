@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback } from "react";
 import PasswordGate from "@/components/PasswordGate";
 import ExerciseForm from "@/components/ExerciseForm";
+import EquipmentSelector from "@/components/EquipmentSelector";
 import VideoPlayer from "@/components/VideoPlayer";
 import {
   getAllRoutines,
@@ -15,6 +16,8 @@ import {
 import type { Routine, Exercise, DayOfWeek } from "@/lib/types";
 import { DAYS_OF_WEEK } from "@/lib/types";
 
+type TrainerTab = "exercises" | "equipment";
+
 export default function TrainerPage() {
   const [authenticated, setAuthenticated] = useState(false);
   const [routines, setRoutines] = useState<Routine[]>([]);
@@ -25,6 +28,7 @@ export default function TrainerPage() {
   const [message, setMessage] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editingExercise, setEditingExercise] = useState<Exercise | undefined>();
+  const [trainerTab, setTrainerTab] = useState<TrainerTab>("exercises");
 
   useEffect(() => {
     if (sessionStorage.getItem("trainer-auth") === "true") {
@@ -153,6 +157,16 @@ export default function TrainerPage() {
     setTimeout(() => setMessage(""), 3000);
   }
 
+  async function handleEquipmentChange(equipment: string[]) {
+    if (!activeRoutine) return;
+    const updated = { ...activeRoutine, equipment };
+    setActiveRoutine(updated);
+    setSaving(true);
+    await saveRoutine(updated);
+    setSaving(false);
+    showMsg("Equipment updated!");
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
@@ -214,6 +228,43 @@ export default function TrainerPage() {
           </button>
         </div>
 
+        {/* Exercises / Equipment tab switcher */}
+        <div className="flex gap-1 bg-slate-100 p-1 rounded-xl mb-6 w-fit">
+          <button
+            onClick={() => setTrainerTab("exercises")}
+            className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${
+              trainerTab === "exercises"
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            Exercises
+          </button>
+          <button
+            onClick={() => setTrainerTab("equipment")}
+            className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${
+              trainerTab === "equipment"
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            Equipment
+          </button>
+        </div>
+
+        {/* Equipment tab content */}
+        {trainerTab === "equipment" && (
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+            <EquipmentSelector
+              selected={activeRoutine?.equipment || []}
+              onChange={handleEquipmentChange}
+            />
+          </div>
+        )}
+
+        {/* Exercises tab content */}
+        {trainerTab === "exercises" && (
+        <>
         {/* Day tabs */}
         <div className="flex gap-1.5 mb-6 overflow-x-auto scrollbar-hide pb-1">
           {DAYS_OF_WEEK.map((day) => {
@@ -370,6 +421,8 @@ export default function TrainerPage() {
             />
           )}
         </div>
+        </>
+        )}
       </div>
     </div>
   );

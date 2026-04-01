@@ -8,19 +8,47 @@ export interface Exercise {
   restSeconds: number;
   notes: string;
   videoType: "youtube" | "upload" | "none";
-  videoUrl: string; // YouTube URL or Firebase Storage URL
+  videoUrl: string;
 }
 
 export interface DayRoutine {
   exercises: Exercise[];
 }
 
+// Equipment that might be needed for the workout
+export interface EquipmentItem {
+  id: string;
+  name: string;
+  icon: string; // emoji icon for display
+}
+
+// All available equipment the trainer can choose from
+export const EQUIPMENT_OPTIONS: EquipmentItem[] = [
+  { id: "dumbbells", name: "Dumbbells", icon: "🏋️" },
+  { id: "barbell", name: "Olympic Barbell", icon: "🔩" },
+  { id: "weight-plates", name: "Weight Plates", icon: "⚫" },
+  { id: "kettlebell", name: "Kettlebell", icon: "🔔" },
+  { id: "bench", name: "Bench", icon: "🪑" },
+  { id: "step", name: "Step / Box", icon: "📦" },
+  { id: "resistance-band", name: "Resistance Band", icon: "🔗" },
+  { id: "pull-up-bar", name: "Pull-Up Bar", icon: "🧲" },
+  { id: "cable-machine", name: "Cable Machine", icon: "🔧" },
+  { id: "foam-roller", name: "Foam Roller", icon: "🧴" },
+  { id: "yoga-mat", name: "Yoga Mat", icon: "🧘" },
+  { id: "medicine-ball", name: "Medicine Ball", icon: "🏀" },
+  { id: "trx", name: "TRX / Suspension", icon: "⛓️" },
+  { id: "ez-bar", name: "EZ Curl Bar", icon: "〰️" },
+  { id: "smith-machine", name: "Smith Machine", icon: "🏗️" },
+  { id: "leg-press", name: "Leg Press", icon: "🦵" },
+];
+
 export interface Routine {
   id: string;
-  weekStart: string; // ISO date string for the Monday of that week, e.g. "2026-03-30"
+  weekStart: string; // ISO date string for the Monday of that week
   published: boolean;
   createdAt: number; // timestamp
   days: Record<string, DayRoutine>; // keys: "Monday", "Tuesday", etc.
+  equipment: string[]; // array of equipment IDs needed this week
 }
 
 export const DAYS_OF_WEEK = [
