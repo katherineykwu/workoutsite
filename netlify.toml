@@ -1,7 +1,3 @@
-[build]
-  command = "npm run build"
-  publish = ".next"
-
 # Disable caching for all API routes so data is always fresh
 [[headers]]
   for = "/api/*"
