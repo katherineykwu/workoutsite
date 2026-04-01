@@ -8,6 +8,12 @@ export const dynamic = "force-dynamic";
 const LOGS_KEY = "workout-logs";
 const PBS_KEY = "personal-bests";
 
+const NO_CACHE_HEADERS = {
+  "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+  "CDN-Cache-Control": "no-store",
+  "Netlify-CDN-Cache-Control": "no-store",
+};
+
 async function readLogs(): Promise<WorkoutLog[]> {
   const data = await getData(LOGS_KEY);
   return data ? JSON.parse(data) : [];
@@ -18,7 +24,7 @@ async function readPBs(): Promise<Record<string, PersonalBest>> {
   return data ? JSON.parse(data) : {};
 }
 
-// GET /api/logs — all logs, or filtered by exercise name
+// GET /api/logs
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const exerciseName = searchParams.get("exerciseName");
@@ -33,26 +39,22 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  return NextResponse.json(logs);
+  return NextResponse.json(logs, { headers: NO_CACHE_HEADERS });
 }
 
 // POST /api/logs — save a workout log and update personal bests
 export async function POST(request: NextRequest) {
   const log: WorkoutLog = await request.json();
 
-  // Save the log
   const logs = await readLogs();
   logs.push(log);
   await setData(LOGS_KEY, JSON.stringify(logs));
 
-  // Update personal bests
   const pbs = await readPBs();
   const newPBs: PersonalBest[] = [];
 
   for (const exerciseLog of log.exercises) {
     const key = exerciseLog.exerciseName.toLowerCase().trim();
-
-    // Find the heaviest set in this exercise
     let maxWeight = 0;
     let repsAtMax = 0;
     for (const set of exerciseLog.sets) {
@@ -61,7 +63,6 @@ export async function POST(request: NextRequest) {
         repsAtMax = set.reps;
       }
     }
-
     if (maxWeight <= 0) continue;
 
     const currentPB = pbs[key];
@@ -80,6 +81,5 @@ export async function POST(request: NextRequest) {
   }
 
   await setData(PBS_KEY, JSON.stringify(pbs));
-
-  return NextResponse.json({ success: true, newPersonalBests: newPBs });
+  return NextResponse.json({ success: true, newPersonalBests: newPBs }, { headers: NO_CACHE_HEADERS });
 }
