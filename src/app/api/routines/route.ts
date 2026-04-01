@@ -16,6 +16,9 @@ async function writeRoutines(routines: Routine[]): Promise<void> {
   await setData(STORE_KEY, JSON.stringify(routines, null, 2));
 }
 
+// Force dynamic — never cache these responses
+export const dynamic = "force-dynamic";
+
 // GET /api/routines
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);

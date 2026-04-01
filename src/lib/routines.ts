@@ -4,7 +4,7 @@ import type { Routine } from "./types";
 
 // Get the published routine (what you see on the home page)
 export async function getPublishedRoutine(): Promise<Routine | null> {
-  const res = await fetch("/api/routines?published=true");
+  const res = await fetch("/api/routines?published=true", { cache: "no-store" });
   if (!res.ok) return null;
   const routines: Routine[] = await res.json();
   return routines.length > 0 ? routines[0] : null;
@@ -12,14 +12,14 @@ export async function getPublishedRoutine(): Promise<Routine | null> {
 
 // Get all routines (trainer sees these)
 export async function getAllRoutines(): Promise<Routine[]> {
-  const res = await fetch("/api/routines");
+  const res = await fetch("/api/routines", { cache: "no-store" });
   if (!res.ok) return [];
   return res.json();
 }
 
 // Get a specific routine by ID
 export async function getRoutine(id: string): Promise<Routine | null> {
-  const res = await fetch(`/api/routines?id=${encodeURIComponent(id)}`);
+  const res = await fetch(`/api/routines?id=${encodeURIComponent(id)}`, { cache: "no-store" });
   if (!res.ok) return null;
   const data = await res.json();
   // If we got an array, find the one with matching ID

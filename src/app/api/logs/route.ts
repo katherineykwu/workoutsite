@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getData, setData } from "@/lib/store";
 import type { WorkoutLog, PersonalBest } from "@/lib/types";
 
+export const dynamic = "force-dynamic";
+
 const LOGS_KEY = "workout-logs";
 const PBS_KEY = "personal-bests";
 

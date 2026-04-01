@@ -3,14 +3,14 @@ import type { WorkoutLog, PersonalBest } from "./types";
 
 // Get all workout logs (newest first)
 export async function getAllLogs(): Promise<WorkoutLog[]> {
-  const res = await fetch("/api/logs");
+  const res = await fetch("/api/logs", { cache: "no-store" });
   if (!res.ok) return [];
   return res.json();
 }
 
 // Get logs that include a specific exercise
 export async function getLogsForExercise(exerciseName: string): Promise<WorkoutLog[]> {
-  const res = await fetch(`/api/logs?exerciseName=${encodeURIComponent(exerciseName)}`);
+  const res = await fetch(`/api/logs?exerciseName=${encodeURIComponent(exerciseName)}`, { cache: "no-store" });
   if (!res.ok) return [];
   return res.json();
 }
@@ -29,7 +29,7 @@ export async function saveWorkoutLog(
 
 // Get all personal bests
 export async function getPersonalBests(): Promise<Record<string, PersonalBest>> {
-  const res = await fetch("/api/personal-bests");
+  const res = await fetch("/api/personal-bests", { cache: "no-store" });
   if (!res.ok) return {};
   return res.json();
 }

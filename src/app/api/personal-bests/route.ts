@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getData } from "@/lib/store";
 import type { PersonalBest } from "@/lib/types";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const exercise = searchParams.get("exercise");
