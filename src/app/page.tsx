@@ -1,4 +1,4 @@
-// Your Workout Page — shows the current week's published routine
+// Your Workout Page — Sweat-inspired design
 "use client";
 
 import { useState, useEffect } from "react";
@@ -9,9 +9,7 @@ import ExerciseCard from "@/components/ExerciseCard";
 import EquipmentDisplay from "@/components/EquipmentDisplay";
 
 function getTodayName(): DayOfWeek {
-  const days: DayOfWeek[] = [
-    "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
-  ];
+  const days: DayOfWeek[] = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
   return days[new Date().getDay()];
 }
 
@@ -20,7 +18,7 @@ function formatWeekRange(weekStart: string): string {
   const end = new Date(start);
   end.setDate(start.getDate() + 6);
   const opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
-  return `${start.toLocaleDateString("en-US", opts)} - ${end.toLocaleDateString("en-US", opts)}`;
+  return `${start.toLocaleDateString("en-US", opts)} – ${end.toLocaleDateString("en-US", opts)}`;
 }
 
 export default function WorkoutPage() {
@@ -31,13 +29,8 @@ export default function WorkoutPage() {
 
   useEffect(() => {
     async function load() {
-      try {
-        const r = await getPublishedRoutine();
-        setRoutine(r);
-      } catch (err) {
-        console.error("Failed to load routine:", err);
-        setError("Couldn't load your workout. Check back soon!");
-      }
+      try { setRoutine(await getPublishedRoutine()); }
+      catch { setError("Couldn't load your workout."); }
       setLoading(false);
     }
     load();
@@ -45,10 +38,10 @@ export default function WorkoutPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f8f9fb]">
+      <div className="min-h-screen flex items-center justify-center gradient-hero">
         <div className="text-center">
-          <div className="w-12 h-12 border-[3px] border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-slate-400 font-medium text-sm">Loading your workout...</p>
+          <div className="w-10 h-10 border-[3px] border-[#FF1A66] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-white/50 text-sm font-medium">Loading your workout...</p>
         </div>
       </div>
     );
@@ -56,17 +49,15 @@ export default function WorkoutPage() {
 
   if (error || !routine) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f8f9fb] px-6">
+      <div className="min-h-screen flex items-center justify-center gradient-hero px-6">
         <div className="text-center max-w-xs">
-          <div className="w-20 h-20 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-sm">
-            <svg className="w-10 h-10 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-            </svg>
+          <div className="w-20 h-20 bg-white/5 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-white/10">
+            <span className="text-4xl">💪</span>
           </div>
-          <h1 className="text-2xl font-extrabold text-slate-900 mb-2">
+          <h1 className="text-2xl font-extrabold text-white mb-2">
             {error ? "Oops!" : "No Workout Yet"}
           </h1>
-          <p className="text-slate-400 leading-relaxed">
+          <p className="text-white/40 leading-relaxed">
             {error || "Your trainer hasn't published a routine yet. Check back soon!"}
           </p>
         </div>
@@ -81,27 +72,20 @@ export default function WorkoutPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb]">
-      {/* Hero header */}
-      <header className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-purple-600 to-violet-700" />
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-60" />
-
-        <div className="relative max-w-2xl mx-auto px-5 pt-10 pb-5">
-          <p className="text-indigo-200 text-xs font-bold uppercase tracking-[0.2em] mb-1.5">
+    <div className="min-h-screen bg-[#F5F3F4]">
+      {/* Dark hero header */}
+      <header className="gradient-hero text-white pb-6">
+        <div className="max-w-2xl mx-auto px-5 pt-12 pb-2">
+          <p className="text-[#FF1A66] text-xs font-bold uppercase tracking-[0.2em] mb-2">
             {formatWeekRange(routine.weekStart)}
           </p>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">
-            My Workout
-          </h1>
-          <p className="text-indigo-200/70 text-sm mt-1">
-            {totalExercises} exercises this week
-          </p>
+          <h1 className="text-3xl font-extrabold tracking-tight">My Workout</h1>
+          <p className="text-white/30 text-sm mt-1">{totalExercises} exercises this week</p>
         </div>
 
-        {/* Day tabs inside header */}
-        <div className="relative max-w-2xl mx-auto px-5 pb-5">
-          <div className="flex gap-1.5 overflow-x-auto scrollbar-hide">
+        {/* Day selector */}
+        <div className="max-w-2xl mx-auto px-5 mt-5">
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide">
             {DAYS_OF_WEEK.map((day) => {
               const count = routine.days[day]?.exercises?.length || 0;
               const isSelected = selectedDay === day;
@@ -110,18 +94,18 @@ export default function WorkoutPage() {
                 <button
                   key={day}
                   onClick={() => setSelectedDay(day)}
-                  className={`relative flex flex-col items-center px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all flex-shrink-0 min-w-[52px] ${
+                  className={`relative flex flex-col items-center min-w-[50px] px-3 py-3 rounded-2xl transition-all flex-shrink-0 ${
                     isSelected
-                      ? "bg-white text-indigo-700 shadow-lg shadow-black/10"
-                      : "bg-white/10 text-white/70 hover:bg-white/20 backdrop-blur-sm"
+                      ? "bg-[#FF1A66] text-white shadow-lg shadow-[#FF1A66]/30"
+                      : "bg-white/8 text-white/50 hover:bg-white/12"
                   }`}
                 >
-                  <span className="text-[10px] uppercase tracking-wider opacity-60 mb-0.5">
+                  <span className={`text-[10px] uppercase tracking-wider mb-0.5 ${isSelected ? "text-white/80" : "text-white/30"}`}>
                     {day.slice(0, 3)}
                   </span>
-                  <span className="text-base">{count || "-"}</span>
-                  {isToday && (
-                    <span className={`absolute -bottom-0.5 w-1.5 h-1.5 rounded-full ${isSelected ? "bg-indigo-500" : "bg-orange-400"}`} />
+                  <span className="text-lg font-bold">{count || "–"}</span>
+                  {isToday && !isSelected && (
+                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#FF1A66] rounded-full border-2 border-[#210826]" />
                   )}
                 </button>
               );
@@ -130,21 +114,21 @@ export default function WorkoutPage() {
         </div>
       </header>
 
-      {/* Content area */}
-      <div className="max-w-2xl mx-auto px-5 py-6">
+      {/* Content */}
+      <div className="max-w-2xl mx-auto px-5 py-7">
         {/* Equipment section */}
         <EquipmentDisplay equipmentIds={routine.equipment || []} />
 
         {/* Day heading */}
         <div className="flex items-center gap-3 mb-5">
-          <h2 className="text-xl font-extrabold text-slate-900">{selectedDay}</h2>
+          <h2 className="text-xl font-extrabold text-[#1A0A1F]">{selectedDay}</h2>
           {selectedDay === today && (
-            <span className="text-[10px] font-bold uppercase tracking-widest bg-gradient-to-r from-orange-500 to-amber-500 text-white px-2.5 py-1 rounded-full">
+            <span className="text-[10px] font-bold uppercase tracking-widest bg-[#FF1A66] text-white px-2.5 py-1 rounded-full">
               Today
             </span>
           )}
           {exercises.length > 0 && (
-            <span className="text-xs text-slate-400 ml-auto font-medium">
+            <span className="text-xs text-[#1A0A1F]/40 ml-auto font-semibold">
               {exercises.length} exercise{exercises.length !== 1 ? "s" : ""}
             </span>
           )}
@@ -152,12 +136,10 @@ export default function WorkoutPage() {
 
         {/* Exercises */}
         {exercises.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="w-16 h-16 bg-slate-100 rounded-3xl flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">😴</span>
-            </div>
-            <p className="text-slate-900 text-lg font-bold">Rest Day</p>
-            <p className="text-slate-400 text-sm mt-1">Recover and come back stronger.</p>
+          <div className="text-center py-20 bg-white rounded-3xl border border-black/5">
+            <span className="text-4xl mb-4 block">😴</span>
+            <p className="text-[#1A0A1F] text-lg font-bold">Rest Day</p>
+            <p className="text-[#1A0A1F]/40 text-sm mt-1">Recover and come back stronger.</p>
           </div>
         ) : (
           <div className="space-y-4 pb-10">

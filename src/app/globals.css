@@ -3,19 +3,16 @@
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --color-brand: #6366f1;
-  --color-brand-light: #818cf8;
-  --color-brand-dark: #4f46e5;
-  --color-accent: #f97316;
-  --color-accent-light: #fb923c;
-  --color-surface: #ffffff;
-  --color-surface-raised: #f8fafc;
-  --color-surface-dark: #0f172a;
-  --color-surface-dark-raised: #1e293b;
-  --color-text-primary: #0f172a;
-  --color-text-secondary: #64748b;
-  --color-text-muted: #94a3b8;
-  --color-border: #e2e8f0;
+
+  /* Sweat-inspired color palette */
+  --color-pink: #FF1A66;
+  --color-pink-light: #FF4D8A;
+  --color-pink-dark: #E0155A;
+  --color-dark: #1A0A1F;
+  --color-dark-card: #2A1230;
+  --color-dark-surface: #210826;
+  --color-warm-gray: #F5F3F4;
+  --color-warm-gray-dark: #EAE6E8;
 }
 
 body {
@@ -23,22 +20,17 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Custom scrollbar for day tabs */
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
+/* Hide scrollbar for day tabs */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* Smooth gradient backgrounds */
-.gradient-brand {
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%);
-}
+/* Sweat-style gradients */
 .gradient-dark {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  background: linear-gradient(160deg, #1A0A1F 0%, #2D1035 50%, #1A0A1F 100%);
 }
-.gradient-warm {
-  background: linear-gradient(135deg, #f97316 0%, #fb923c 50%, #fbbf24 100%);
+.gradient-pink {
+  background: linear-gradient(135deg, #FF1A66 0%, #FF4D8A 100%);
+}
+.gradient-hero {
+  background: linear-gradient(160deg, #210826 0%, #3D1548 40%, #210826 100%);
 }
