@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback } from "react";
 import PasswordGate from "@/components/PasswordGate";
 import ExerciseForm from "@/components/ExerciseForm";
-import EquipmentSelector from "@/components/EquipmentSelector";
+import EquipmentDisplay from "@/components/EquipmentDisplay";
 import VideoPlayer from "@/components/VideoPlayer";
 import {
   getAllRoutines, saveRoutine, getRoutine, createBlankRoutine, getCurrentWeekMonday,
@@ -14,6 +14,13 @@ import type { Routine, Exercise, DayOfWeek, WorkoutLog, PersonalBest } from "@/l
 import { DAYS_OF_WEEK } from "@/lib/types";
 
 type TrainerTab = "exercises" | "equipment" | "activity";
+
+// Fetch client's equipment selection
+async function fetchClientEquipment(): Promise<string[]> {
+  const res = await fetch("/api/my-equipment", { cache: "no-store" });
+  if (!res.ok) return [];
+  return res.json();
+}
 
 export default function TrainerPage() {
   const [authenticated, setAuthenticated] = useState(false);
@@ -28,6 +35,7 @@ export default function TrainerPage() {
   const [trainerTab, setTrainerTab] = useState<TrainerTab>("exercises");
   const [workoutLogs, setWorkoutLogs] = useState<WorkoutLog[]>([]);
   const [clientPBs, setClientPBs] = useState<Record<string, PersonalBest>>({});
+  const [clientEquipment, setClientEquipment] = useState<string[]>([]);
 
   useEffect(() => {
     if (sessionStorage.getItem("trainer-auth") === "true") setAuthenticated(true);
@@ -56,8 +64,13 @@ export default function TrainerPage() {
   useEffect(() => { if (authenticated) loadRoutines(); }, [authenticated, loadRoutines]);
 
   useEffect(() => {
-    if (authenticated && trainerTab === "activity" && workoutLogs.length === 0) {
-      loadClientActivity();
+    if (authenticated && (trainerTab === "activity" || trainerTab === "equipment")) {
+      if (trainerTab === "activity" && workoutLogs.length === 0) {
+        loadClientActivity();
+      }
+      if (trainerTab === "equipment" && clientEquipment.length === 0) {
+        fetchClientEquipment().then(setClientEquipment);
+      }
     }
   }, [authenticated, trainerTab]);
 
@@ -130,18 +143,13 @@ export default function TrainerPage() {
     showMsg(`Created week of ${dateStr}`);
   }
 
-  async function handleEquipmentChange(equipment: string[]) {
-    if (!activeRoutine) return;
-    const updated = { ...activeRoutine, equipment };
-    setActiveRoutine(updated);
-    setSaving(true); await saveRoutine(updated); setSaving(false);
-    showMsg("Equipment updated!");
-  }
+
 
   async function loadClientActivity() {
-    const [logs, pbs] = await Promise.all([getAllLogs(), getPersonalBests()]);
+    const [logs, pbs, eq] = await Promise.all([getAllLogs(), getPersonalBests(), fetchClientEquipment()]);
     setWorkoutLogs(logs);
     setClientPBs(pbs);
+    setClientEquipment(eq);
   }
 
   function showMsg(msg: string) { setMessage(msg); setTimeout(() => setMessage(""), 3000); }
@@ -205,10 +213,27 @@ export default function TrainerPage() {
           ))}
         </div>
 
-        {/* Equipment tab */}
+        {/* Equipment tab — shows client's available equipment (read-only) */}
         {trainerTab === "equipment" && (
-          <div className="bg-white rounded-2xl border border-black/5 shadow-sm p-6">
-            <EquipmentSelector selected={activeRoutine?.equipment || []} onChange={handleEquipmentChange} />
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-[#FF1A66] text-xs font-bold uppercase tracking-[0.15em] mb-1">Client&apos;s Equipment</p>
+                <p className="text-[#1A0A1F]/40 text-sm">What Katherine has access to right now</p>
+              </div>
+              <button onClick={() => fetchClientEquipment().then(setClientEquipment)}
+                className="text-xs text-[#1A0A1F]/30 hover:text-[#1A0A1F]/60 font-medium transition-colors">
+                Refresh
+              </button>
+            </div>
+            {clientEquipment.length > 0 ? (
+              <EquipmentDisplay equipmentIds={clientEquipment} />
+            ) : (
+              <div className="text-center py-12 bg-white rounded-2xl border border-black/5">
+                <span className="text-3xl mb-3 block">🏋️</span>
+                <p className="text-[#1A0A1F]/30 text-sm">Katherine hasn&apos;t selected her equipment yet</p>
+              </div>
+            )}
           </div>
         )}
 
