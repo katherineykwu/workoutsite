@@ -15,10 +15,10 @@ import { DAYS_OF_WEEK } from "@/lib/types";
 
 type TrainerTab = "exercises" | "equipment" | "activity";
 
-// Fetch client's equipment selection
-async function fetchClientEquipment(): Promise<string[]> {
+// Fetch client's equipment selection + gym photos
+async function fetchClientEquipment(): Promise<{ equipment: string[]; gymPhotos: string[] }> {
   const res = await fetch("/api/my-equipment", { cache: "no-store" });
-  if (!res.ok) return [];
+  if (!res.ok) return { equipment: [], gymPhotos: [] };
   return res.json();
 }
 
@@ -36,6 +36,7 @@ export default function TrainerPage() {
   const [workoutLogs, setWorkoutLogs] = useState<WorkoutLog[]>([]);
   const [clientPBs, setClientPBs] = useState<Record<string, PersonalBest>>({});
   const [clientEquipment, setClientEquipment] = useState<string[]>([]);
+  const [clientGymPhotos, setClientGymPhotos] = useState<string[]>([]);
 
   useEffect(() => {
     if (sessionStorage.getItem("trainer-auth") === "true") setAuthenticated(true);
@@ -69,7 +70,7 @@ export default function TrainerPage() {
         loadClientActivity();
       }
       if (trainerTab === "equipment" && clientEquipment.length === 0) {
-        fetchClientEquipment().then(setClientEquipment);
+        fetchClientEquipment().then((d) => { setClientEquipment(d.equipment || []); setClientGymPhotos(d.gymPhotos || []); });
       }
     }
   }, [authenticated, trainerTab]);
@@ -146,10 +147,11 @@ export default function TrainerPage() {
 
 
   async function loadClientActivity() {
-    const [logs, pbs, eq] = await Promise.all([getAllLogs(), getPersonalBests(), fetchClientEquipment()]);
+    const [logs, pbs, eqData] = await Promise.all([getAllLogs(), getPersonalBests(), fetchClientEquipment()]);
     setWorkoutLogs(logs);
     setClientPBs(pbs);
-    setClientEquipment(eq);
+    setClientEquipment(eqData.equipment || []);
+    setClientGymPhotos(eqData.gymPhotos || []);
   }
 
   function showMsg(msg: string) { setMessage(msg); setTimeout(() => setMessage(""), 3000); }
@@ -221,7 +223,7 @@ export default function TrainerPage() {
                 <p className="text-[#FF1A66] text-xs font-bold uppercase tracking-[0.15em] mb-1">Client&apos;s Equipment</p>
                 <p className="text-[#1A0A1F]/40 text-sm">What Katherine has access to right now</p>
               </div>
-              <button onClick={() => fetchClientEquipment().then(setClientEquipment)}
+              <button onClick={() => fetchClientEquipment().then((d) => { setClientEquipment(d.equipment || []); setClientGymPhotos(d.gymPhotos || []); })}
                 className="text-xs text-[#1A0A1F]/30 hover:text-[#1A0A1F]/60 font-medium transition-colors">
                 Refresh
               </button>
@@ -232,6 +234,22 @@ export default function TrainerPage() {
               <div className="text-center py-12 bg-white rounded-2xl border border-black/5">
                 <span className="text-3xl mb-3 block">🏋️</span>
                 <p className="text-[#1A0A1F]/30 text-sm">Katherine hasn&apos;t selected her equipment yet</p>
+              </div>
+            )}
+
+            {/* Gym photos from client */}
+            {clientGymPhotos.length > 0 && (
+              <div className="mt-6">
+                <p className="text-[#FF1A66] text-xs font-bold uppercase tracking-[0.15em] mb-2">Gym Photos</p>
+                <p className="text-[#1A0A1F]/40 text-sm mb-4">Photos from Katherine&apos;s gym</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {clientGymPhotos.map((url, i) => (
+                    <div key={i} className="rounded-2xl overflow-hidden bg-[#F5F3F4] aspect-[4/3] border border-black/5 shadow-sm">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={url} alt={`Client gym photo ${i + 1}`} className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>

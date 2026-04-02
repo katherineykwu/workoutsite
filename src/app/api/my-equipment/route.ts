@@ -1,4 +1,4 @@
-// API route: GET and POST /api/my-equipment — your available equipment
+// API route: GET and POST /api/my-equipment — your available equipment + gym photos
 import { NextRequest, NextResponse } from "next/server";
 import { getData, setData } from "@/lib/store";
 
@@ -12,16 +12,28 @@ const NO_CACHE_HEADERS = {
 
 const STORE_KEY = "my-equipment";
 
-// GET /api/my-equipment — returns your selected equipment IDs
-export async function GET() {
-  const data = await getData(STORE_KEY);
-  const equipment: string[] = data ? JSON.parse(data) : [];
-  return NextResponse.json(equipment, { headers: NO_CACHE_HEADERS });
+interface MyEquipmentData {
+  equipment: string[];
+  gymPhotos: string[];
 }
 
-// POST /api/my-equipment — save your equipment selection
+// GET /api/my-equipment
+export async function GET() {
+  const data = await getData(STORE_KEY);
+  if (data) {
+    const parsed = JSON.parse(data);
+    // Handle legacy format (just an array) vs new format (object with equipment + photos)
+    if (Array.isArray(parsed)) {
+      return NextResponse.json({ equipment: parsed, gymPhotos: [] }, { headers: NO_CACHE_HEADERS });
+    }
+    return NextResponse.json(parsed, { headers: NO_CACHE_HEADERS });
+  }
+  return NextResponse.json({ equipment: [], gymPhotos: [] }, { headers: NO_CACHE_HEADERS });
+}
+
+// POST /api/my-equipment
 export async function POST(request: NextRequest) {
-  const equipment: string[] = await request.json();
-  await setData(STORE_KEY, JSON.stringify(equipment));
+  const body: MyEquipmentData = await request.json();
+  await setData(STORE_KEY, JSON.stringify(body));
   return NextResponse.json({ success: true }, { headers: NO_CACHE_HEADERS });
 }

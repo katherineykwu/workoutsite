@@ -45,6 +45,7 @@ export default function WorkoutPage() {
   const [showToast, setShowToast] = useState(false);
   const [newPBs, setNewPBs] = useState<PersonalBest[]>([]);
   const [myEquipment, setMyEquipment] = useState<string[]>([]);
+  const [gymPhotos, setGymPhotos] = useState<string[]>([]);
   const [showEquipmentModal, setShowEquipmentModal] = useState(false);
 
   useEffect(() => {
@@ -57,7 +58,11 @@ export default function WorkoutPage() {
         ]);
         setRoutine(r);
         setPersonalBests(pbs);
-        if (eqRes.ok) setMyEquipment(await eqRes.json());
+        if (eqRes.ok) {
+          const eqData = await eqRes.json();
+          setMyEquipment(eqData.equipment || []);
+          setGymPhotos(eqData.gymPhotos || []);
+        }
       } catch { setError("Couldn't load your workout."); }
       setLoading(false);
     }
@@ -104,13 +109,14 @@ export default function WorkoutPage() {
     });
   }
 
-  async function handleSaveEquipment(equipment: string[]) {
+  async function handleSaveEquipment(equipment: string[], photos: string[]) {
     setMyEquipment(equipment);
+    setGymPhotos(photos);
     setShowEquipmentModal(false);
     await fetch("/api/my-equipment", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(equipment),
+      body: JSON.stringify({ equipment, gymPhotos: photos }),
     });
   }
 
@@ -192,6 +198,7 @@ export default function WorkoutPage() {
       {showEquipmentModal && (
         <MyEquipmentModal
           selected={myEquipment}
+          gymPhotos={gymPhotos}
           onSave={handleSaveEquipment}
           onClose={() => setShowEquipmentModal(false)}
         />
