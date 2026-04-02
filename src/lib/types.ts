@@ -6,6 +6,7 @@ export interface Exercise {
   sets: number;
   reps: string; // e.g. "8-10" or "12"
   restSeconds: number;
+  targetWeight: number; // suggested weight in lbs (0 = not specified)
   notes: string;
   videoType: "youtube" | "upload" | "none";
   videoUrl: string;

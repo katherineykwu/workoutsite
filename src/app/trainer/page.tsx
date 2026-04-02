@@ -243,6 +243,7 @@ export default function TrainerPage() {
                           <span className="font-medium">{exercise.sets} sets</span>
                           <span className="text-[#1A0A1F]/20">|</span>
                           <span className="font-medium">{exercise.reps} reps</span>
+                          {exercise.targetWeight > 0 && (<><span className="text-[#1A0A1F]/20">|</span><span className="font-medium text-[#FF1A66]">{exercise.targetWeight} lbs</span></>)}
                           {exercise.restSeconds > 0 && (<><span className="text-[#1A0A1F]/20">|</span><span className="font-medium">{exercise.restSeconds}s rest</span></>)}
                         </div>
                         {exercise.notes && <p className="text-sm text-[#1A0A1F]/30 mt-1.5 italic">{exercise.notes}</p>}
