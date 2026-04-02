@@ -55,6 +55,12 @@ export default function TrainerPage() {
 
   useEffect(() => { if (authenticated) loadRoutines(); }, [authenticated, loadRoutines]);
 
+  useEffect(() => {
+    if (authenticated && trainerTab === "activity" && workoutLogs.length === 0) {
+      loadClientActivity();
+    }
+  }, [authenticated, trainerTab]);
+
   if (!authenticated) return <PasswordGate onSuccess={() => setAuthenticated(true)} />;
 
   if (loading) {
@@ -137,12 +143,6 @@ export default function TrainerPage() {
     setWorkoutLogs(logs);
     setClientPBs(pbs);
   }
-
-  useEffect(() => {
-    if (trainerTab === "activity" && workoutLogs.length === 0) {
-      loadClientActivity();
-    }
-  }, [trainerTab]);
 
   function showMsg(msg: string) { setMessage(msg); setTimeout(() => setMessage(""), 3000); }
 
