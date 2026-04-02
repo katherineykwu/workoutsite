@@ -10,15 +10,16 @@ interface ExerciseCardProps {
   index: number;
   loggingMode?: boolean;
   currentSets?: SetLog[];
+  clientNote?: string;
   lastSets?: SetLog[];
   personalBest?: PersonalBest;
   onSetChange?: (exerciseId: string, setNumber: number, weight: number, reps: number) => void;
+  onNoteChange?: (exerciseId: string, note: string) => void;
 }
 
 export default function ExerciseCard({
-  exercise, index, loggingMode, currentSets, lastSets, personalBest, onSetChange,
+  exercise, index, loggingMode, currentSets, clientNote, lastSets, personalBest, onSetChange, onNoteChange,
 }: ExerciseCardProps) {
-  // Check if any current set exceeds the PR
   const currentMax = currentSets?.reduce((max, s) => Math.max(max, s.weight), 0) || 0;
   const isNewPR = loggingMode && personalBest && currentMax > personalBest.weight;
 
@@ -71,7 +72,7 @@ export default function ExerciseCard({
               )}
             </div>
 
-            {/* Notes */}
+            {/* Trainer notes */}
             {exercise.notes && !loggingMode && (
               <p className="mt-3 text-[#1A0A1F]/40 text-sm leading-relaxed">{exercise.notes}</p>
             )}
@@ -103,6 +104,17 @@ export default function ExerciseCard({
                   );
                 })}
               </div>
+            )}
+
+            {/* Client note input (during logging) */}
+            {loggingMode && onNoteChange && (
+              <textarea
+                value={clientNote || ""}
+                onChange={(e) => onNoteChange(exercise.id, e.target.value)}
+                placeholder="Notes for Jamie (e.g. felt easy, shoulder was tight...)"
+                rows={2}
+                className="mt-3 w-full px-3 py-2.5 bg-[#F5F3F4] border border-black/5 rounded-xl text-[#1A0A1F] text-sm placeholder-[#1A0A1F]/25 focus:outline-none focus:ring-2 focus:ring-[#FF1A66] focus:border-transparent resize-none"
+              />
             )}
           </div>
         </div>

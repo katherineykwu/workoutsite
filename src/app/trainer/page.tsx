@@ -9,10 +9,11 @@ import VideoPlayer from "@/components/VideoPlayer";
 import {
   getAllRoutines, saveRoutine, getRoutine, createBlankRoutine, getCurrentWeekMonday,
 } from "@/lib/routines";
-import type { Routine, Exercise, DayOfWeek } from "@/lib/types";
+import { getAllLogs, getPersonalBests } from "@/lib/workoutLogs";
+import type { Routine, Exercise, DayOfWeek, WorkoutLog, PersonalBest } from "@/lib/types";
 import { DAYS_OF_WEEK } from "@/lib/types";
 
-type TrainerTab = "exercises" | "equipment";
+type TrainerTab = "exercises" | "equipment" | "activity";
 
 export default function TrainerPage() {
   const [authenticated, setAuthenticated] = useState(false);
@@ -25,6 +26,8 @@ export default function TrainerPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingExercise, setEditingExercise] = useState<Exercise | undefined>();
   const [trainerTab, setTrainerTab] = useState<TrainerTab>("exercises");
+  const [workoutLogs, setWorkoutLogs] = useState<WorkoutLog[]>([]);
+  const [clientPBs, setClientPBs] = useState<Record<string, PersonalBest>>({});
 
   useEffect(() => {
     if (sessionStorage.getItem("trainer-auth") === "true") setAuthenticated(true);
@@ -129,6 +132,18 @@ export default function TrainerPage() {
     showMsg("Equipment updated!");
   }
 
+  async function loadClientActivity() {
+    const [logs, pbs] = await Promise.all([getAllLogs(), getPersonalBests()]);
+    setWorkoutLogs(logs);
+    setClientPBs(pbs);
+  }
+
+  useEffect(() => {
+    if (trainerTab === "activity" && workoutLogs.length === 0) {
+      loadClientActivity();
+    }
+  }, [trainerTab]);
+
   function showMsg(msg: string) { setMessage(msg); setTimeout(() => setMessage(""), 3000); }
 
   return (
@@ -181,7 +196,7 @@ export default function TrainerPage() {
 
         {/* Tab switcher */}
         <div className="flex gap-1 bg-[#EAE6E8] p-1 rounded-xl mb-6 w-fit">
-          {(["exercises", "equipment"] as TrainerTab[]).map((tab) => (
+          {(["exercises", "equipment", "activity"] as TrainerTab[]).map((tab) => (
             <button key={tab} onClick={() => setTrainerTab(tab)}
               className={`px-5 py-2.5 rounded-lg text-sm font-semibold capitalize transition-all ${
                 trainerTab === tab ? "bg-[#FF1A66] text-white shadow-md" : "text-[#1A0A1F]/40 hover:text-[#1A0A1F]/60"
@@ -194,6 +209,83 @@ export default function TrainerPage() {
         {trainerTab === "equipment" && (
           <div className="bg-white rounded-2xl border border-black/5 shadow-sm p-6">
             <EquipmentSelector selected={activeRoutine?.equipment || []} onChange={handleEquipmentChange} />
+          </div>
+        )}
+
+        {/* Activity tab — client's logged workouts */}
+        {trainerTab === "activity" && (
+          <div className="space-y-6">
+            {/* Personal Bests summary */}
+            {Object.keys(clientPBs).length > 0 && (
+              <div>
+                <p className="text-[#FF1A66] text-xs font-bold uppercase tracking-[0.15em] mb-2">Personal Records</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                  {Object.values(clientPBs).sort((a, b) => b.weight - a.weight).map((pb) => (
+                    <div key={pb.exerciseName} className="bg-white rounded-xl border border-black/5 shadow-sm p-3 border-l-4 border-l-[#FF1A66]">
+                      <p className="text-xs font-bold text-[#1A0A1F] truncate">{pb.displayName}</p>
+                      <p className="text-lg font-extrabold text-[#FF1A66]">{pb.weight} <span className="text-xs text-[#1A0A1F]/30">lbs</span></p>
+                      <p className="text-[10px] text-[#1A0A1F]/30">{pb.reps} reps · {pb.date}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Workout logs */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-[#FF1A66] text-xs font-bold uppercase tracking-[0.15em]">Workout History</p>
+                <button onClick={loadClientActivity} className="text-xs text-[#1A0A1F]/30 hover:text-[#1A0A1F]/60 font-medium transition-colors">
+                  Refresh
+                </button>
+              </div>
+
+              {workoutLogs.length === 0 ? (
+                <div className="text-center py-12 bg-white rounded-2xl border border-black/5">
+                  <span className="text-3xl mb-3 block">📋</span>
+                  <p className="text-[#1A0A1F]/30 text-sm">No workouts logged yet</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {workoutLogs.map((log) => {
+                    const d = new Date(log.date + "T00:00:00");
+                    const dateStr = d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+                    return (
+                      <div key={log.id} className="bg-white rounded-2xl border border-black/5 shadow-sm p-5">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <p className="font-bold text-[#1A0A1F] text-sm">{dateStr}</p>
+                            <p className="text-[10px] text-[#1A0A1F]/30">{log.dayOfWeek} · {log.exercises.length} exercise{log.exercises.length !== 1 ? "s" : ""}</p>
+                          </div>
+                        </div>
+                        <div className="space-y-3">
+                          {log.exercises.map((ex) => (
+                            <div key={ex.exerciseId} className="border-t border-black/5 pt-3 first:border-0 first:pt-0">
+                              <p className="text-sm font-semibold text-[#1A0A1F]">{ex.exerciseName}</p>
+                              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                                {ex.sets.map((set) => (
+                                  <span key={set.setNumber} className="text-xs bg-[#F5F3F4] text-[#1A0A1F]/60 px-2.5 py-1 rounded-lg font-medium">
+                                    {set.weight} lbs × {set.reps}
+                                  </span>
+                                ))}
+                              </div>
+                              {ex.clientNote && (
+                                <div className="mt-2 flex items-start gap-2 bg-[#FF1A66]/5 rounded-lg px-3 py-2">
+                                  <svg className="w-3.5 h-3.5 text-[#FF1A66] mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                                  </svg>
+                                  <p className="text-xs text-[#FF1A66] font-medium leading-relaxed">{ex.clientNote}</p>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         )}
 

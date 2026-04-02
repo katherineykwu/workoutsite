@@ -44,6 +44,9 @@ export default function WorkoutHistoryItem({ log }: { log: WorkoutLog }) {
                   </span>
                 ))}
               </div>
+              {ex.clientNote && (
+                <p className="text-xs text-[#1A0A1F]/40 italic mt-1.5">{ex.clientNote}</p>
+              )}
             </div>
           ))}
         </div>

@@ -39,6 +39,7 @@ export default function WorkoutPage() {
   const [logData, setLogData] = useState<Record<string, SetLog[]>>({});
   const [lastSession, setLastSession] = useState<Record<string, SetLog[]>>({});
   const [personalBests, setPersonalBests] = useState<Record<string, PersonalBest>>({});
+  const [noteData, setNoteData] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [newPBs, setNewPBs] = useState<PersonalBest[]>([]);
@@ -95,17 +96,22 @@ export default function WorkoutPage() {
     });
   }
 
+  function handleNoteChange(exerciseId: string, note: string) {
+    setNoteData((prev) => ({ ...prev, [exerciseId]: note }));
+  }
+
   async function handleFinishWorkout() {
     if (!routine) return;
     setSaving(true);
 
     const exercises = routine.days[selectedDay]?.exercises || [];
     const exerciseLogs: ExerciseLog[] = exercises
-      .filter((ex) => logData[ex.id]?.some((s) => s.weight > 0 || s.reps > 0))
+      .filter((ex) => logData[ex.id]?.some((s) => s.weight > 0 || s.reps > 0) || noteData[ex.id])
       .map((ex) => ({
         exerciseId: ex.id,
         exerciseName: ex.name,
         sets: logData[ex.id] || [],
+        clientNote: noteData[ex.id] || "",
       }));
 
     const log: WorkoutLog = {
@@ -121,6 +127,7 @@ export default function WorkoutPage() {
     setSaving(false);
     setLoggingMode(false);
     setLogData({});
+    setNoteData({});
     setNewPBs(result.newPersonalBests || []);
     setShowToast(true);
 
@@ -194,7 +201,7 @@ export default function WorkoutPage() {
               const isSelected = selectedDay === day;
               const isToday = day === today;
               return (
-                <button key={day} onClick={() => { setSelectedDay(day); if (loggingMode) { setLoggingMode(false); setLogData({}); } }}
+                <button key={day} onClick={() => { setSelectedDay(day); if (loggingMode) { setLoggingMode(false); setLogData({}); setNoteData({}); } }}
                   className={`relative flex flex-col items-center min-w-[50px] px-3 py-3 rounded-2xl transition-all flex-shrink-0 ${
                     isSelected ? "bg-[#FF1A66] text-white shadow-lg shadow-[#FF1A66]/30" : "bg-[#F5F3F4] text-[#1A0A1F]/40 hover:bg-[#EAE6E8]"
                   }`}>
@@ -228,7 +235,7 @@ export default function WorkoutPage() {
           )}
           {loggingMode && (
             <button
-              onClick={() => { setLoggingMode(false); setLogData({}); }}
+              onClick={() => { setLoggingMode(false); setLogData({}); setNoteData({}); }}
               className="ml-auto bg-[#1A0A1F]/10 text-[#1A0A1F]/50 px-4 py-2 rounded-xl text-xs font-semibold hover:bg-[#1A0A1F]/15 transition-colors"
             >
               Cancel
@@ -254,7 +261,9 @@ export default function WorkoutPage() {
                 currentSets={logData[exercise.id]}
                 lastSets={lastSession[exercise.id]}
                 personalBest={personalBests[exercise.name.toLowerCase().trim()]}
+                clientNote={noteData[exercise.id]}
                 onSetChange={handleSetChange}
+                onNoteChange={handleNoteChange}
               />
             ))}
           </div>

@@ -78,6 +78,7 @@ export interface ExerciseLog {
   exerciseId: string;
   exerciseName: string; // saved at log time so history stays accurate even if trainer renames
   sets: SetLog[];
+  clientNote: string;   // your notes for your trainer (e.g. "felt easy", "shoulder pain")
 }
 
 // A completed workout session
