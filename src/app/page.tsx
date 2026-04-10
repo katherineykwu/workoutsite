@@ -319,7 +319,7 @@ export default function WorkoutPage() {
           {selectedDay === today && (
             <span className="text-[10px] font-bold uppercase tracking-widest bg-[#C4706E] text-white px-2.5 py-1 rounded-full">Today</span>
           )}
-          {exercises.length > 0 && !loggingMode && isCurrentWeek && (
+          {exercises.length > 0 && !loggingMode && (
             <button
               onClick={() => setLoggingMode(true)}
               className="ml-auto gradient-pink text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md shadow-[#C4706E]/20 hover:opacity-90 transition-all"
