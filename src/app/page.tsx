@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { getPublishedRoutine } from "@/lib/routines";
+import { getPublishedRoutine, getAllRoutines, getCurrentWeekMonday } from "@/lib/routines";
 import { getAllLogs, saveWorkoutLog, getPersonalBests } from "@/lib/workoutLogs";
 import type { Routine, DayOfWeek, SetLog, ExerciseLog, WorkoutLog, PersonalBest } from "@/lib/types";
 import { DAYS_OF_WEEK } from "@/lib/types";
@@ -31,9 +31,11 @@ function todayISO(): string {
 
 export default function WorkoutPage() {
   const [routine, setRoutine] = useState<Routine | null>(null);
+  const [allRoutines, setAllRoutines] = useState<Routine[]>([]);
   const [selectedDay, setSelectedDay] = useState<DayOfWeek>(getTodayName());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isCurrentWeek, setIsCurrentWeek] = useState(true);
 
   // Logging state
   const [loggingMode, setLoggingMode] = useState(false);
@@ -51,12 +53,16 @@ export default function WorkoutPage() {
   useEffect(() => {
     async function load() {
       try {
-        const [r, pbs, eqRes] = await Promise.all([
+        const [r, allR, pbs, eqRes] = await Promise.all([
           getPublishedRoutine(),
+          getAllRoutines(),
           getPersonalBests(),
           fetch("/api/my-equipment", { cache: "no-store" }),
         ]);
         setRoutine(r);
+        // Keep all published routines for week navigation
+        setAllRoutines(allR.filter((rt: Routine) => rt.published));
+        if (r) setIsCurrentWeek(r.weekStart === getCurrentWeekMonday());
         setPersonalBests(pbs);
         if (eqRes.ok) {
           const eqData = await eqRes.json();
@@ -108,6 +114,24 @@ export default function WorkoutPage() {
       return { ...prev, [exerciseId]: sets };
     });
   }
+
+  function navigateWeek(direction: "prev" | "next") {
+    if (!routine || allRoutines.length === 0) return;
+    const currentIdx = allRoutines.findIndex((r) => r.id === routine.id);
+    // allRoutines is sorted newest first, so "prev" = next index, "next" = prev index
+    const newIdx = direction === "prev" ? currentIdx + 1 : currentIdx - 1;
+    if (newIdx < 0 || newIdx >= allRoutines.length) return;
+    const newRoutine = allRoutines[newIdx];
+    setRoutine(newRoutine);
+    setIsCurrentWeek(newRoutine.weekStart === getCurrentWeekMonday());
+    setSelectedDay(getTodayName());
+    setLoggingMode(false);
+    setLogData({});
+    setNoteData({});
+  }
+
+  const canGoPrev = routine && allRoutines.findIndex((r) => r.id === routine.id) < allRoutines.length - 1;
+  const canGoNext = routine && allRoutines.findIndex((r) => r.id === routine.id) > 0;
 
   async function handleSaveEquipment(equipment: string[], photos: string[]) {
     setMyEquipment(equipment);
@@ -208,11 +232,35 @@ export default function WorkoutPage() {
       <header className="bg-white border-b border-black/5 pb-6">
         <div className="max-w-2xl mx-auto px-5 pt-10 pb-2 flex items-start justify-between">
           <div>
-            <p className="text-[#FF1A66] text-xs font-bold uppercase tracking-[0.2em] mb-2">
-              {formatWeekRange(routine.weekStart)}
-            </p>
+            {/* Week navigator */}
+            <div className="flex items-center gap-2 mb-2">
+              <button
+                onClick={() => navigateWeek("prev")}
+                disabled={!canGoPrev}
+                className="p-1 text-[#1A0A1F]/20 hover:text-[#1A0A1F]/60 disabled:opacity-0 transition-all"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+              </button>
+              <p className="text-[#FF1A66] text-xs font-bold uppercase tracking-[0.2em]">
+                {formatWeekRange(routine.weekStart)}
+              </p>
+              <button
+                onClick={() => navigateWeek("next")}
+                disabled={!canGoNext}
+                className="p-1 text-[#1A0A1F]/20 hover:text-[#1A0A1F]/60 disabled:opacity-0 transition-all"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+              </button>
+            </div>
             <h1 className="text-3xl font-extrabold tracking-tight text-[#1A0A1F]">My Workout</h1>
-            <p className="text-[#1A0A1F]/30 text-sm mt-1">{totalExercises} exercises this week</p>
+            <p className="text-[#1A0A1F]/30 text-sm mt-1">
+              {totalExercises} exercise{totalExercises !== 1 ? "s" : ""} this week
+              {!isCurrentWeek && <span className="text-[#FF1A66] ml-1.5">(past week)</span>}
+            </p>
           </div>
           <div className="flex gap-2 mt-2">
             <button
@@ -269,7 +317,7 @@ export default function WorkoutPage() {
           {selectedDay === today && (
             <span className="text-[10px] font-bold uppercase tracking-widest bg-[#FF1A66] text-white px-2.5 py-1 rounded-full">Today</span>
           )}
-          {exercises.length > 0 && !loggingMode && (
+          {exercises.length > 0 && !loggingMode && isCurrentWeek && (
             <button
               onClick={() => setLoggingMode(true)}
               className="ml-auto gradient-pink text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md shadow-[#FF1A66]/20 hover:opacity-90 transition-all"
