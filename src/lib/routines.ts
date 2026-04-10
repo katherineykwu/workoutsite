@@ -3,11 +3,20 @@
 import type { Routine } from "./types";
 
 // Get the published routine (what you see on the home page)
+// Prefers the current week's routine, falls back to the most recent published one
 export async function getPublishedRoutine(): Promise<Routine | null> {
   const res = await fetch("/api/routines?published=true", { cache: "no-store" });
   if (!res.ok) return null;
   const routines: Routine[] = await res.json();
-  return routines.length > 0 ? routines[0] : null;
+  if (routines.length === 0) return null;
+
+  // Try to find a routine for the current week first
+  const currentMonday = getCurrentWeekMonday();
+  const thisWeek = routines.find((r) => r.weekStart === currentMonday);
+  if (thisWeek) return thisWeek;
+
+  // Fall back to the most recent published routine
+  return routines[0];
 }
 
 // Get all routines (trainer sees these)
