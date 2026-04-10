@@ -199,12 +199,31 @@ export default function TrainerPage() {
             className="px-4 py-2.5 bg-white border border-[#4A5D23]/15 rounded-xl text-[#1A0A1F] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#4A5D23]"
           >
             {routines.map((r) => (
-              <option key={r.id} value={r.id}>Week of {r.weekStart}{r.published ? " (Live)" : ""}</option>
+              <option key={r.id} value={r.id}>Week of {r.weekStart}{r.published ? " (Live)" : ""}{(r.repeatWeeks || 1) > 1 ? ` (${r.repeatWeeks}wk)` : ""}</option>
             ))}
           </select>
           <button onClick={handleCreateNewWeek} className="px-4 py-2.5 bg-white border border-[#4A5D23]/15 text-[#4A5D23]/60 rounded-xl hover:bg-[#4A5D23]/5 text-sm font-semibold transition-colors">
             + New Week
           </button>
+          {/* Repeat weeks */}
+          <div className="flex items-center gap-2 bg-white border border-[#4A5D23]/15 rounded-xl px-3 py-1.5">
+            <span className="text-xs text-[#1A0A1F]/40 font-medium whitespace-nowrap">Repeat</span>
+            <select
+              value={activeRoutine?.repeatWeeks || 1}
+              onChange={async (e) => {
+                if (!activeRoutine) return;
+                const updated = { ...activeRoutine, repeatWeeks: Number(e.target.value) };
+                setActiveRoutine(updated);
+                setSaving(true); await saveRoutine(updated); setSaving(false);
+                showMsg(Number(e.target.value) > 1 ? `Repeats for ${e.target.value} weeks` : "Single week");
+              }}
+              className="text-sm font-bold text-[#4A5D23] bg-transparent focus:outline-none cursor-pointer"
+            >
+              {[1, 2, 3, 4, 5, 6, 8].map((n) => (
+                <option key={n} value={n}>{n} {n === 1 ? "week" : "weeks"}</option>
+              ))}
+            </select>
+          </div>
           <button onClick={handleTogglePublish} className={`ml-auto px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
             activeRoutine?.published
               ? "bg-white text-[#E8730C] border border-[#E8730C]/30 hover:bg-[#E8730C]/5"

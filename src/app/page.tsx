@@ -261,7 +261,12 @@ export default function WorkoutPage() {
             <h1 className="text-3xl font-extrabold tracking-tight text-[#49443D]">My Workout <span className="text-2xl">🐱</span></h1>
             <p className="text-[#49443D]/30 text-sm mt-1">
               {totalExercises} exercise{totalExercises !== 1 ? "s" : ""} this week
-              {!isCurrentWeek && <span className="text-[#C4706E] ml-1.5">(past week)</span>}
+              {(routine.repeatWeeks || 1) > 1 && (
+                <span className="text-[#C4706E] ml-1.5">
+                  (repeats {routine.repeatWeeks} weeks)
+                </span>
+              )}
+              {!isCurrentWeek && !(routine.repeatWeeks && routine.repeatWeeks > 1) && <span className="text-[#C4706E] ml-1.5">(past week)</span>}
             </p>
           </div>
           <div className="flex gap-2 mt-2">

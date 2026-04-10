@@ -52,6 +52,7 @@ export interface Routine {
   createdAt: number; // timestamp
   days: Record<string, DayRoutine>; // keys: "Monday", "Tuesday", etc.
   equipment: string[]; // array of equipment IDs needed this week
+  repeatWeeks?: number; // how many weeks this routine runs (1 = just this week, 4 = repeat for 4 weeks)
 }
 
 export const DAYS_OF_WEEK = [

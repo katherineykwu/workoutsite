@@ -15,6 +15,19 @@ export async function getPublishedRoutine(): Promise<Routine | null> {
   const thisWeek = routines.find((r) => r.weekStart === currentMonday);
   if (thisWeek) return thisWeek;
 
+  // Check if any routine covers the current week via repeatWeeks
+  const currentDate = new Date(currentMonday + "T00:00:00");
+  for (const r of routines) {
+    const weeks = r.repeatWeeks || 1;
+    if (weeks <= 1) continue;
+    const start = new Date(r.weekStart + "T00:00:00");
+    const endDate = new Date(start);
+    endDate.setDate(start.getDate() + weeks * 7);
+    if (currentDate >= start && currentDate < endDate) {
+      return r;
+    }
+  }
+
   // Fall back to the most recent published routine
   return routines[0];
 }
