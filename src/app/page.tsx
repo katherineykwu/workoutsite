@@ -51,6 +51,37 @@ export default function WorkoutPage() {
   const [myEquipment, setMyEquipment] = useState<string[]>([]);
   const [gymPhotos, setGymPhotos] = useState<string[]>([]);
   const [showEquipmentModal, setShowEquipmentModal] = useState(false);
+  const [draftSaved, setDraftSaved] = useState(false);
+
+  // Auto-save workout draft to localStorage whenever data changes
+  useEffect(() => {
+    if (!loggingMode) return;
+    const draft = { logData, noteData, selectedDay, routineId: routine?.id, timestamp: Date.now() };
+    localStorage.setItem("workout-draft", JSON.stringify(draft));
+  }, [logData, noteData, loggingMode, selectedDay, routine?.id]);
+
+  // Restore draft on page load if one exists
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("workout-draft");
+      if (!saved) return;
+      const draft = JSON.parse(saved);
+      // Only restore if less than 24 hours old
+      if (Date.now() - draft.timestamp > 24 * 60 * 60 * 1000) {
+        localStorage.removeItem("workout-draft");
+        return;
+      }
+      if (draft.logData && Object.keys(draft.logData).length > 0) {
+        setLogData(draft.logData);
+        setNoteData(draft.noteData || {});
+        setLoggingMode(true);
+        if (draft.selectedDay) setSelectedDay(draft.selectedDay);
+        setDraftSaved(true);
+        // Auto-clear the indicator after 3 seconds
+        setTimeout(() => setDraftSaved(false), 3000);
+      }
+    } catch { /* ignore corrupt data */ }
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -178,6 +209,7 @@ export default function WorkoutPage() {
     setLoggingMode(false);
     setLogData({});
     setNoteData({});
+    localStorage.removeItem("workout-draft");
     setNewPBs(result.newPersonalBests || []);
     setShowToast(true);
 
@@ -337,7 +369,7 @@ export default function WorkoutPage() {
           )}
           {loggingMode && (
             <button
-              onClick={() => { setLoggingMode(false); setLogData({}); setNoteData({}); }}
+              onClick={() => { setLoggingMode(false); setLogData({}); setNoteData({}); localStorage.removeItem("workout-draft"); }}
               className="ml-auto bg-[#49443D]/10 text-[#49443D]/50 px-4 py-2 rounded-xl text-xs font-semibold hover:bg-[#49443D]/15 transition-colors"
             >
               Cancel
@@ -405,9 +437,14 @@ export default function WorkoutPage() {
       {loggingMode && exercises.length > 0 && (
         <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-black/10 px-5 py-4 z-20">
           <div className="max-w-2xl mx-auto flex items-center justify-between">
-            <span className="text-sm text-[#49443D]/40 font-medium">
-              {loggedCount}/{exercises.length} exercises logged
-            </span>
+            <div>
+              <span className="text-sm text-[#49443D]/40 font-medium">
+                {loggedCount}/{exercises.length} logged
+              </span>
+              <span className="text-[10px] text-[#49443D]/25 ml-2">
+                {draftSaved ? "Draft restored!" : "Auto-saving..."}
+              </span>
+            </div>
             <button
               onClick={handleFinishWorkout}
               disabled={saving}
