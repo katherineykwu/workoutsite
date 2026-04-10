@@ -414,7 +414,6 @@ export default function TrainerPage() {
                           <span className="text-[#1A0A1F]/20">|</span>
                           <span className="font-medium">{exercise.reps} reps</span>
                           {exercise.targetWeight > 0 && (<><span className="text-[#1A0A1F]/20">|</span><span className="font-medium text-[#E8730C]">{exercise.targetWeight} lbs</span></>)}
-                          {exercise.restSeconds > 0 && (<><span className="text-[#1A0A1F]/20">|</span><span className="font-medium">{exercise.restSeconds}s rest</span></>)}
                         </div>
                         {exercise.notes && <p className="text-sm text-[#1A0A1F]/30 mt-1.5 italic">{exercise.notes}</p>}
                         {exercise.videoType !== "none" && exercise.videoUrl && (

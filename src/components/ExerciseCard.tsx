@@ -59,12 +59,6 @@ export default function ExerciseCard({
                   <span className="text-xs text-[#FF1A66]/60">lbs</span>
                 </div>
               )}
-              {exercise.restSeconds > 0 && (
-                <div className="flex items-center gap-1.5 bg-[#F5F3F4] text-[#1A0A1F]/70 px-3 py-1.5 rounded-lg">
-                  <span className="text-sm font-bold">{exercise.restSeconds}s</span>
-                  <span className="text-xs text-[#1A0A1F]/40">rest</span>
-                </div>
-              )}
               {personalBest && (
                 <div className="flex items-center gap-1.5 bg-[#FF1A66]/5 text-[#FF1A66] px-3 py-1.5 rounded-lg ml-auto">
                   <span className="text-xs font-bold">PR: {personalBest.weight} lbs</span>

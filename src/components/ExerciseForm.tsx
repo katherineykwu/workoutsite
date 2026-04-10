@@ -15,7 +15,6 @@ export default function ExerciseForm({ exercise, routineId, onSave, onCancel }: 
   const [name, setName] = useState(exercise?.name || "");
   const [sets, setSets] = useState(exercise?.sets || 3);
   const [reps, setReps] = useState(exercise?.reps || "10");
-  const [restSeconds, setRestSeconds] = useState(exercise?.restSeconds || 60);
   const [targetWeight, setTargetWeight] = useState(exercise?.targetWeight || 0);
   const [notes, setNotes] = useState(exercise?.notes || "");
   const [videoType, setVideoType] = useState<"youtube" | "upload" | "none">(exercise?.videoType || "none");
@@ -43,7 +42,7 @@ export default function ExerciseForm({ exercise, routineId, onSave, onCancel }: 
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    onSave({ id: exerciseId, name, sets, reps, restSeconds, targetWeight, notes, videoType, videoUrl });
+    onSave({ id: exerciseId, name, sets, reps, restSeconds: 0, targetWeight, notes, videoType, videoUrl });
   }
 
   const inputClass = "w-full px-4 py-3 bg-[#F5F3F4] border border-black/5 rounded-xl text-[#1A0A1F] placeholder-[#1A0A1F]/30 focus:outline-none focus:ring-2 focus:ring-[#4A5D23] focus:border-transparent transition-all";
@@ -60,7 +59,7 @@ export default function ExerciseForm({ exercise, routineId, onSave, onCancel }: 
           placeholder="e.g. Barbell Squat" required className={inputClass} />
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-3 gap-3">
         <div>
           <label className="block text-sm font-semibold text-[#1A0A1F]/50 mb-1.5">Sets</label>
           <input type="number" value={sets} onChange={(e) => setSets(Number(e.target.value))} min={1} className={inputClass} />
@@ -72,10 +71,6 @@ export default function ExerciseForm({ exercise, routineId, onSave, onCancel }: 
         <div>
           <label className="block text-sm font-semibold text-[#1A0A1F]/50 mb-1.5">Weight (lbs)</label>
           <input type="number" value={targetWeight || ""} onChange={(e) => setTargetWeight(Number(e.target.value))} min={0} placeholder="0" className={inputClass} />
-        </div>
-        <div>
-          <label className="block text-sm font-semibold text-[#1A0A1F]/50 mb-1.5">Rest (sec)</label>
-          <input type="number" value={restSeconds} onChange={(e) => setRestSeconds(Number(e.target.value))} min={0} step={15} className={inputClass} />
         </div>
       </div>
 
