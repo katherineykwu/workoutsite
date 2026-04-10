@@ -53,14 +53,14 @@ export default function MyEquipmentModal({ selected, gymPhotos: initialPhotos, o
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-1">
-          <h2 className="text-lg font-extrabold text-[#1A0A1F]">My Equipment</h2>
-          <button onClick={onClose} className="p-2 text-[#1A0A1F]/30 hover:text-[#1A0A1F]/60 transition-colors">
+          <h2 className="text-lg font-extrabold text-[#49443D]">My Equipment</h2>
+          <button onClick={onClose} className="p-2 text-[#49443D]/30 hover:text-[#49443D]/60 transition-colors">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
-        <p className="text-[#1A0A1F]/40 text-sm mb-5">
+        <p className="text-[#49443D]/40 text-sm mb-5">
           Select what you have access to so Jamie knows what to include in your workouts.
         </p>
 
@@ -75,14 +75,14 @@ export default function MyEquipmentModal({ selected, gymPhotos: initialPhotos, o
                 onClick={() => toggle(item.id)}
                 className={`flex items-center gap-2.5 px-3.5 py-3.5 rounded-xl text-left transition-all text-sm font-medium ${
                   isSelected
-                    ? "bg-[#FF1A66]/10 text-[#FF1A66] ring-2 ring-[#FF1A66] shadow-sm"
-                    : "bg-[#F5F3F4] border border-black/5 text-[#1A0A1F]/60"
+                    ? "bg-[#C4706E]/10 text-[#C4706E] ring-2 ring-[#C4706E] shadow-sm"
+                    : "bg-[#F5F0E8] border border-black/5 text-[#49443D]/60"
                 }`}
               >
                 <span className="text-xl flex-shrink-0">{item.icon}</span>
                 <span className="truncate">{item.name}</span>
                 {isSelected && (
-                  <svg className="w-4 h-4 ml-auto flex-shrink-0 text-[#FF1A66]" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-4 h-4 ml-auto flex-shrink-0 text-[#C4706E]" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 )}
@@ -93,8 +93,8 @@ export default function MyEquipmentModal({ selected, gymPhotos: initialPhotos, o
 
         {/* Gym photos section */}
         <div className="border-t border-black/5 pt-5 mb-6">
-          <p className="text-[#FF1A66] text-xs font-bold uppercase tracking-[0.15em] mb-1">Gym Photos</p>
-          <p className="text-[#1A0A1F]/40 text-sm mb-4">
+          <p className="text-[#C4706E] text-xs font-bold uppercase tracking-[0.15em] mb-1">Gym Photos</p>
+          <p className="text-[#49443D]/40 text-sm mb-4">
             Upload photos of your gym so Jamie can see exactly what&apos;s available.
           </p>
 
@@ -102,7 +102,7 @@ export default function MyEquipmentModal({ selected, gymPhotos: initialPhotos, o
           {photos.length > 0 && (
             <div className="grid grid-cols-2 gap-2.5 mb-4">
               {photos.map((url, i) => (
-                <div key={i} className="relative rounded-xl overflow-hidden bg-[#F5F3F4] aspect-[4/3]">
+                <div key={i} className="relative rounded-xl overflow-hidden bg-[#F5F0E8] aspect-[4/3]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={url} alt={`Gym photo ${i + 1}`} className="w-full h-full object-cover" />
                   <button
@@ -119,7 +119,7 @@ export default function MyEquipmentModal({ selected, gymPhotos: initialPhotos, o
           )}
 
           {/* Upload button */}
-          <label className={`flex items-center justify-center gap-2 w-full py-3.5 border-2 border-dashed border-black/10 rounded-xl text-[#1A0A1F]/40 hover:text-[#FF1A66] hover:border-[#FF1A66]/30 hover:bg-[#FF1A66]/5 font-semibold text-sm cursor-pointer transition-all ${uploading ? "opacity-50 pointer-events-none" : ""}`}>
+          <label className={`flex items-center justify-center gap-2 w-full py-3.5 border-2 border-dashed border-black/10 rounded-xl text-[#49443D]/40 hover:text-[#C4706E] hover:border-[#C4706E]/30 hover:bg-[#C4706E]/5 font-semibold text-sm cursor-pointer transition-all ${uploading ? "opacity-50 pointer-events-none" : ""}`}>
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
@@ -137,7 +137,7 @@ export default function MyEquipmentModal({ selected, gymPhotos: initialPhotos, o
 
         <button
           onClick={() => onSave(local, photos)}
-          className="w-full gradient-pink text-white py-3.5 rounded-xl font-bold shadow-lg shadow-[#FF1A66]/25 hover:opacity-90 transition-all"
+          className="w-full gradient-pink text-white py-3.5 rounded-xl font-bold shadow-lg shadow-[#C4706E]/25 hover:opacity-90 transition-all"
         >
           Save ({local.length} equipment{photos.length > 0 ? ` + ${photos.length} photo${photos.length !== 1 ? "s" : ""}` : ""})
         </button>

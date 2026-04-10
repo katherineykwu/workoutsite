@@ -48,7 +48,7 @@ export default function ProgressChart({ logs, exerciseName }: ProgressChartProps
 
   if (dataPoints.length === 0) {
     return (
-      <div className="text-center py-12 text-[#1A0A1F]/30 text-sm">
+      <div className="text-center py-12 text-[#49443D]/30 text-sm">
         No data yet for this exercise
       </div>
     );
@@ -58,38 +58,38 @@ export default function ProgressChart({ logs, exerciseName }: ProgressChartProps
     <div className="h-64">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={dataPoints} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#EAE6E8" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#EDE6DA" />
           <XAxis
             dataKey="label"
-            tick={{ fontSize: 11, fill: "#1A0A1F80" }}
-            axisLine={{ stroke: "#EAE6E8" }}
+            tick={{ fontSize: 11, fill: "#49443D80" }}
+            axisLine={{ stroke: "#EDE6DA" }}
             tickLine={false}
           />
           <YAxis
-            tick={{ fontSize: 11, fill: "#1A0A1F80" }}
+            tick={{ fontSize: 11, fill: "#49443D80" }}
             axisLine={false}
             tickLine={false}
             unit=" lbs"
           />
           <Tooltip
             contentStyle={{
-              background: "#1A0A1F",
+              background: "#49443D",
               border: "none",
               borderRadius: "12px",
               padding: "10px 14px",
               fontSize: "13px",
             }}
             labelStyle={{ color: "#ffffff80", fontSize: "11px" }}
-            itemStyle={{ color: "#FF1A66", fontWeight: 700 }}
+            itemStyle={{ color: "#C4706E", fontWeight: 700 }}
             formatter={(value) => [`${value} lbs`, "Max Weight"]}
           />
           <Line
             type="monotone"
             dataKey="weight"
-            stroke="#FF1A66"
+            stroke="#C4706E"
             strokeWidth={2.5}
-            dot={{ fill: "#FF1A66", r: 4, strokeWidth: 0 }}
-            activeDot={{ fill: "#FF1A66", r: 6, strokeWidth: 2, stroke: "#fff" }}
+            dot={{ fill: "#C4706E", r: 4, strokeWidth: 0 }}
+            activeDot={{ fill: "#C4706E", r: 6, strokeWidth: 2, stroke: "#fff" }}
           />
         </LineChart>
       </ResponsiveContainer>

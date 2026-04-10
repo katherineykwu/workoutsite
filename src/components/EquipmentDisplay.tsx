@@ -18,10 +18,10 @@ export default function EquipmentDisplay({ equipmentIds }: EquipmentDisplayProps
 
   return (
     <div className="mb-8">
-      <p className="text-[#FF1A66] text-xs font-bold uppercase tracking-[0.15em] mb-2">
+      <p className="text-[#C4706E] text-xs font-bold uppercase tracking-[0.15em] mb-2">
         Equipment
       </p>
-      <h3 className="text-xl font-extrabold text-[#1A0A1F] mb-5">
+      <h3 className="text-xl font-extrabold text-[#49443D] mb-5">
         What you&apos;ll need
       </h3>
       <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
@@ -31,7 +31,7 @@ export default function EquipmentDisplay({ equipmentIds }: EquipmentDisplayProps
             className="flex flex-col items-center gap-2 bg-white rounded-2xl border border-black/5 px-3 py-5 shadow-sm"
           >
             <span className="text-3xl">{item!.icon}</span>
-            <span className="text-xs font-semibold text-[#1A0A1F]/70 text-center leading-tight">
+            <span className="text-xs font-semibold text-[#49443D]/70 text-center leading-tight">
               {item!.name}
             </span>
           </div>

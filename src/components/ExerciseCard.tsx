@@ -29,15 +29,15 @@ export default function ExerciseCard({
 
       <div className="p-5">
         <div className="flex items-start gap-3.5">
-          <span className="flex-shrink-0 w-9 h-9 rounded-xl bg-[#FF1A66] text-white flex items-center justify-center text-sm font-bold shadow-sm shadow-[#FF1A66]/20">
+          <span className="flex-shrink-0 w-9 h-9 rounded-xl bg-[#C4706E] text-white flex items-center justify-center text-sm font-bold shadow-sm shadow-[#C4706E]/20">
             {index + 1}
           </span>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-[#1A0A1F] text-[17px] leading-snug">{exercise.name}</h3>
+              <h3 className="font-bold text-[#49443D] text-[17px] leading-snug">{exercise.name}</h3>
               {isNewPR && (
-                <span className="text-[10px] font-bold uppercase tracking-wider bg-[#FF1A66] text-white px-2 py-0.5 rounded-full animate-pulse">
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-[#C4706E] text-white px-2 py-0.5 rounded-full animate-pulse">
                   New PR!
                 </span>
               )}
@@ -45,22 +45,22 @@ export default function ExerciseCard({
 
             {/* Stats */}
             <div className="flex flex-wrap gap-2 mt-3">
-              <div className="flex items-center gap-1.5 bg-[#F5F3F4] text-[#1A0A1F]/70 px-3 py-1.5 rounded-lg">
+              <div className="flex items-center gap-1.5 bg-[#F5F0E8] text-[#49443D]/70 px-3 py-1.5 rounded-lg">
                 <span className="text-sm font-bold">{exercise.sets}</span>
-                <span className="text-xs text-[#1A0A1F]/40">sets</span>
+                <span className="text-xs text-[#49443D]/40">sets</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-[#F5F3F4] text-[#1A0A1F]/70 px-3 py-1.5 rounded-lg">
+              <div className="flex items-center gap-1.5 bg-[#F5F0E8] text-[#49443D]/70 px-3 py-1.5 rounded-lg">
                 <span className="text-sm font-bold">{exercise.reps}</span>
-                <span className="text-xs text-[#1A0A1F]/40">reps</span>
+                <span className="text-xs text-[#49443D]/40">reps</span>
               </div>
               {exercise.targetWeight > 0 && (
-                <div className="flex items-center gap-1.5 bg-[#FF1A66]/8 text-[#FF1A66] px-3 py-1.5 rounded-lg">
+                <div className="flex items-center gap-1.5 bg-[#C4706E]/8 text-[#C4706E] px-3 py-1.5 rounded-lg">
                   <span className="text-sm font-bold">{exercise.targetWeight}</span>
-                  <span className="text-xs text-[#FF1A66]/60">lbs</span>
+                  <span className="text-xs text-[#C4706E]/60">lbs</span>
                 </div>
               )}
               {personalBest && (
-                <div className="flex items-center gap-1.5 bg-[#FF1A66]/5 text-[#FF1A66] px-3 py-1.5 rounded-lg ml-auto">
+                <div className="flex items-center gap-1.5 bg-[#C4706E]/5 text-[#C4706E] px-3 py-1.5 rounded-lg ml-auto">
                   <span className="text-xs font-bold">PR: {personalBest.weight} lbs</span>
                 </div>
               )}
@@ -68,12 +68,12 @@ export default function ExerciseCard({
 
             {/* Trainer notes */}
             {exercise.notes && !loggingMode && (
-              <p className="mt-3 text-[#1A0A1F]/40 text-sm leading-relaxed">{exercise.notes}</p>
+              <p className="mt-3 text-[#49443D]/40 text-sm leading-relaxed">{exercise.notes}</p>
             )}
 
             {/* Last session hint */}
             {loggingMode && lastSets && lastSets.length > 0 && (
-              <p className="mt-2 text-[#1A0A1F]/30 text-xs">
+              <p className="mt-2 text-[#49443D]/30 text-xs">
                 Last: {lastSets.map((s) => `${s.weight}x${s.reps}`).join(", ")}
               </p>
             )}
@@ -107,7 +107,7 @@ export default function ExerciseCard({
                 onChange={(e) => onNoteChange(exercise.id, e.target.value)}
                 placeholder="Notes for Jamie (e.g. felt easy, shoulder was tight...)"
                 rows={2}
-                className="mt-3 w-full px-3 py-2.5 bg-[#F5F3F4] border border-black/5 rounded-xl text-[#1A0A1F] text-sm placeholder-[#1A0A1F]/25 focus:outline-none focus:ring-2 focus:ring-[#FF1A66] focus:border-transparent resize-none"
+                className="mt-3 w-full px-3 py-2.5 bg-[#F5F0E8] border border-black/5 rounded-xl text-[#49443D] text-sm placeholder-[#49443D]/25 focus:outline-none focus:ring-2 focus:ring-[#C4706E] focus:border-transparent resize-none"
               />
             )}
           </div>

@@ -3,16 +3,6 @@
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-
-  /* Sweat-inspired color palette */
-  --color-pink: #FF1A66;
-  --color-pink-light: #FF4D8A;
-  --color-pink-dark: #E0155A;
-  --color-dark: #1A0A1F;
-  --color-dark-card: #2A1230;
-  --color-dark-surface: #210826;
-  --color-warm-gray: #F5F3F4;
-  --color-warm-gray-dark: #EAE6E8;
 }
 
 body {
@@ -24,13 +14,7 @@ body {
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* Sweat-style gradients */
-.gradient-dark {
-  background: #ffffff;
-}
+/* Kiki-inspired gradient for your view */
 .gradient-pink {
-  background: linear-gradient(135deg, #FF1A66 0%, #FF4D8A 100%);
-}
-.gradient-hero {
-  background: #ffffff;
+  background: linear-gradient(135deg, #C4706E 0%, #D4918F 100%);
 }
