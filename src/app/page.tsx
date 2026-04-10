@@ -186,7 +186,10 @@ export default function WorkoutPage() {
     setPersonalBests(pbs);
   }
 
-  const loggedCount = Object.values(logData).filter((sets) => sets.some((s) => s.weight > 0 || s.reps > 0)).length;
+  const currentExercises = routine?.days[selectedDay]?.exercises || [];
+  const loggedCount = currentExercises.filter((ex) =>
+    logData[ex.id]?.some((s) => s.weight > 0 || s.reps > 0) || noteData[ex.id]
+  ).length;
 
   if (loading) {
     return (
@@ -407,7 +410,7 @@ export default function WorkoutPage() {
             </span>
             <button
               onClick={handleFinishWorkout}
-              disabled={loggedCount === 0 || saving}
+              disabled={saving}
               className="gradient-pink text-white px-6 py-3 rounded-xl font-bold text-sm shadow-lg shadow-[#C4706E]/25 hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
             >
               {saving ? "Saving..." : "Finish Workout"}
