@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 import PasswordGate from "@/components/PasswordGate";
 import ExerciseForm from "@/components/ExerciseForm";
 import EquipmentDisplay from "@/components/EquipmentDisplay";
+import ProgressChart from "@/components/ProgressChart";
 import VideoPlayer from "@/components/VideoPlayer";
 import {
   getAllRoutines, saveRoutine, getRoutine, createBlankRoutine, getCurrentWeekMonday,
@@ -37,6 +38,7 @@ export default function TrainerPage() {
   const [clientPBs, setClientPBs] = useState<Record<string, PersonalBest>>({});
   const [clientEquipment, setClientEquipment] = useState<string[]>([]);
   const [clientGymPhotos, setClientGymPhotos] = useState<string[]>([]);
+  const [chartExercise, setChartExercise] = useState<string>("");
 
   useEffect(() => {
     if (sessionStorage.getItem("trainer-auth") === "true") setAuthenticated(true);
@@ -152,6 +154,10 @@ export default function TrainerPage() {
     setClientPBs(pbs);
     setClientEquipment(eqData.equipment || []);
     setClientGymPhotos(eqData.gymPhotos || []);
+    // Auto-select first exercise for progress chart
+    const names = new Set<string>();
+    for (const log of logs) for (const ex of log.exercises) names.add(ex.exerciseName);
+    if (names.size > 0 && !chartExercise) setChartExercise([...names][0]);
   }
 
   function showMsg(msg: string) { setMessage(msg); setTimeout(() => setMessage(""), 3000); }
@@ -276,6 +282,32 @@ export default function TrainerPage() {
                 </div>
               </div>
             )}
+
+            {/* Progress chart */}
+            {workoutLogs.length > 0 && (() => {
+              const exerciseNames = Array.from(new Set(workoutLogs.flatMap((l) => l.exercises.map((e) => e.exerciseName))));
+              return exerciseNames.length > 0 ? (
+                <div>
+                  <p className="text-[#E8730C] text-xs font-bold uppercase tracking-[0.15em] mb-2">Progress</p>
+                  <p className="text-lg font-extrabold text-[#1A0A1F] mb-4">Katherine&apos;s Strength Over Time</p>
+                  <div className="flex gap-1.5 overflow-x-auto scrollbar-hide mb-4 pb-1">
+                    {exerciseNames.map((name) => (
+                      <button key={name} onClick={() => setChartExercise(name)}
+                        className={`px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex-shrink-0 ${
+                          chartExercise === name
+                            ? "bg-[#4A5D23] text-white shadow-md"
+                            : "bg-white border border-black/5 text-[#1A0A1F]/50 hover:bg-[#F7F6F0]"
+                        }`}>
+                        {name}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="bg-white rounded-2xl border border-black/5 p-4 shadow-sm">
+                    <ProgressChart logs={workoutLogs} exerciseName={chartExercise || exerciseNames[0]} />
+                  </div>
+                </div>
+              ) : null;
+            })()}
 
             {/* Workout logs */}
             <div>
