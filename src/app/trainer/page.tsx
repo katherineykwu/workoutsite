@@ -166,12 +166,12 @@ export default function TrainerPage() {
   return (
     <div className="min-h-screen bg-[#F7F6F0]">
       {/* Header — army green with personal welcome */}
-      <header className="border-b border-[#4A5D23]/10 sticky top-0 z-10 bg-white/95 backdrop-blur-xl">
-        <div className="max-w-4xl mx-auto px-5 py-4 flex items-center justify-between">
+      <header className="border-b border-[#4A5D23]/10 sticky top-0 z-10 bg-white/95 backdrop-blur-xl relative texture-grain overflow-hidden">
+        <div className="max-w-4xl mx-auto px-5 py-4 flex items-center justify-between relative">
           <div className="flex items-center gap-3">
-            <span className="text-2xl">🦦</span>
+            <span className="text-2xl hover-wiggle inline-block cursor-default">🦦</span>
             <div>
-              <h1 className="text-lg font-bold text-[#4A5D23]">Welcome, Jamie!</h1>
+              <h1 className="text-lg font-bold text-[#4A5D23] font-display">Welcome, Jamie!</h1>
               {activeRoutine && <p className="text-[#4A5D23]/40 text-xs">Week of {activeRoutine.weekStart}</p>}
             </div>
           </div>
@@ -237,7 +237,7 @@ export default function TrainerPage() {
         <div className="flex gap-1 bg-[#4A5D23]/8 p-1 rounded-xl mb-6 w-fit">
           {(["exercises", "equipment", "activity"] as TrainerTab[]).map((tab) => (
             <button key={tab} onClick={() => setTrainerTab(tab)}
-              className={`px-5 py-2.5 rounded-lg text-sm font-semibold capitalize transition-all ${
+              className={`px-5 py-2.5 rounded-full text-sm font-semibold capitalize transition-all font-display hover-pop ${
                 trainerTab === tab ? "bg-[#4A5D23] text-white shadow-md" : "text-[#4A5D23]/40 hover:text-[#4A5D23]/60"
               }`}
             >{tab}</button>

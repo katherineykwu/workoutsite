@@ -26,18 +26,18 @@ export default function SupersetCard({
   const rounds = exercises[0]?.sets || 1;
 
   return (
-    <div className="rounded-2xl border border-[#C4706E]/15 bg-[#FFFDF9] overflow-hidden">
+    <div className="rounded-3xl border border-[#C4706E]/15 bg-[#FFFDF9] overflow-hidden shadow-playful">
       {/* Superset header */}
       <div className="px-5 pt-4 pb-3 flex items-center justify-between">
         <div>
           {label && (
-            <h3 className="font-bold text-[#49443D] text-[15px] mb-1.5">{label}</h3>
+            <h3 className="font-bold text-[#49443D] text-[15px] mb-1.5 font-display">{label}</h3>
           )}
-          <span className="inline-block text-[10px] font-bold uppercase tracking-widest bg-[#C4706E]/15 text-[#C4706E] px-2.5 py-1 rounded-full">
+          <span className="inline-block text-[10px] font-bold uppercase tracking-widest bg-[#C4706E]/15 text-[#C4706E] px-3 py-1 rounded-full font-display">
             Superset
           </span>
         </div>
-        <span className="text-lg font-extrabold text-[#C4706E]">
+        <span className="text-lg font-bold text-[#C4706E] font-display">
           x{rounds}
         </span>
       </div>

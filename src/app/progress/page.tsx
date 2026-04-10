@@ -67,7 +67,7 @@ export default function ProgressPage() {
             Back to Workout
           </Link>
           <p className="text-[#C4706E] text-xs font-bold uppercase tracking-[0.2em] mb-2">Analytics</p>
-          <h1 className="text-3xl font-extrabold tracking-tight text-[#49443D]">My Progress</h1>
+          <h1 className="text-3xl font-bold font-display tracking-tight text-[#49443D]">My Progress</h1>
           {hasData && (
             <p className="text-[#49443D]/30 text-sm mt-1">
               {logs.length} workout{logs.length !== 1 ? "s" : ""} logged · {pbList.length} PR{pbList.length !== 1 ? "s" : ""}
@@ -80,7 +80,7 @@ export default function ProgressPage() {
         {!hasData ? (
           <div className="text-center py-20 bg-white rounded-3xl border border-black/5">
             <span className="text-5xl mb-4 block">📊</span>
-            <h2 className="text-xl font-extrabold text-[#49443D] mb-2">No Data Yet</h2>
+            <h2 className="text-xl font-bold font-display text-[#49443D] mb-2">No Data Yet</h2>
             <p className="text-[#49443D]/40 text-sm max-w-xs mx-auto">
               Start logging your workouts to see progress charts, personal bests, and workout history here.
             </p>
@@ -97,7 +97,7 @@ export default function ProgressPage() {
             {pbList.length > 0 && (
               <section className="mb-8">
                 <p className="text-[#C4706E] text-xs font-bold uppercase tracking-[0.15em] mb-2">Personal Records</p>
-                <h2 className="text-xl font-extrabold text-[#49443D] mb-4">Your Best Lifts</h2>
+                <h2 className="text-xl font-bold font-display text-[#49443D] mb-4">Your Best Lifts</h2>
                 <div className="grid grid-cols-2 gap-3">
                   {pbList.map((pb) => (
                     <PersonalBestCard key={pb.exerciseName} pb={pb} />
@@ -110,7 +110,7 @@ export default function ProgressPage() {
             {exerciseNames.length > 0 && (
               <section className="mb-8">
                 <p className="text-[#C4706E] text-xs font-bold uppercase tracking-[0.15em] mb-2">Progress</p>
-                <h2 className="text-xl font-extrabold text-[#49443D] mb-4">Weight Over Time</h2>
+                <h2 className="text-xl font-bold font-display text-[#49443D] mb-4">Weight Over Time</h2>
 
                 {/* Exercise selector */}
                 <div className="flex gap-1.5 overflow-x-auto scrollbar-hide mb-5 pb-1">
@@ -139,7 +139,7 @@ export default function ProgressPage() {
             {/* Section: Workout History */}
             <section>
               <p className="text-[#C4706E] text-xs font-bold uppercase tracking-[0.15em] mb-2">History</p>
-              <h2 className="text-xl font-extrabold text-[#49443D] mb-4">Past Workouts</h2>
+              <h2 className="text-xl font-bold font-display text-[#49443D] mb-4">Past Workouts</h2>
               <div className="space-y-3 pb-8">
                 {logs.map((log) => (
                   <WorkoutHistoryItem key={log.id} log={log} />

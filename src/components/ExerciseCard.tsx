@@ -25,18 +25,18 @@ export default function ExerciseCard({
   const isNewPR = loggingMode && personalBest && currentMax > personalBest.weight;
 
   return (
-    <div className={compact ? "" : "bg-white rounded-2xl shadow-sm border border-black/5 overflow-hidden hover:shadow-md transition-shadow"}>
+    <div className={compact ? "" : "bg-white rounded-3xl shadow-playful shadow-playful-hover border border-black/5 overflow-hidden"}>
       {!loggingMode && !compact && <VideoPlayer videoType={exercise.videoType} videoUrl={exercise.videoUrl} />}
 
       <div className={compact ? "py-2" : "p-5"}>
         <div className="flex items-start gap-3.5">
-          <span className="flex-shrink-0 w-9 h-9 rounded-xl bg-[#C4706E] text-white flex items-center justify-center text-sm font-bold shadow-sm shadow-[#C4706E]/20">
+          <span className="flex-shrink-0 w-9 h-9 rounded-2xl bg-[#C4706E] text-white flex items-center justify-center text-sm font-bold shadow-sm shadow-[#C4706E]/20 font-display">
             {index + 1}
           </span>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-[#49443D] text-[17px] leading-snug">{exercise.name}</h3>
+              <h3 className="font-bold text-[#49443D] text-[17px] leading-snug font-display">{exercise.name}</h3>
               {isNewPR && (
                 <span className="text-[10px] font-bold uppercase tracking-wider bg-[#C4706E] text-white px-2 py-0.5 rounded-full animate-pulse">
                   New PR!

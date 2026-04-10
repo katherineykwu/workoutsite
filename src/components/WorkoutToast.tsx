@@ -17,9 +17,9 @@ export default function WorkoutToast({ newPBs, onDismiss }: WorkoutToastProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onDismiss}>
-      <div className="bg-white rounded-3xl p-8 max-w-sm mx-6 text-center shadow-2xl animate-[scaleIn_0.3s_ease-out]" onClick={(e) => e.stopPropagation()}>
-        <span className="text-5xl block mb-3">🎉</span>
-        <h2 className="text-2xl font-extrabold text-[#49443D] mb-1">Workout Complete!</h2>
+      <div className="bg-white rounded-3xl p-8 max-w-sm mx-6 text-center shadow-2xl animate-bounce-in" onClick={(e) => e.stopPropagation()}>
+        <span className="text-5xl block mb-3 animate-wiggle">🎉</span>
+        <h2 className="text-2xl font-bold text-[#49443D] mb-1 font-display">Workout Complete!</h2>
         <p className="text-[#49443D]/40 text-sm mb-4">Great work. Keep it up!</p>
 
         {newPBs.length > 0 && (
@@ -40,7 +40,7 @@ export default function WorkoutToast({ newPBs, onDismiss }: WorkoutToastProps) {
 
         <button
           onClick={onDismiss}
-          className="mt-5 gradient-pink text-white px-8 py-3 rounded-xl font-bold text-sm shadow-lg shadow-[#C4706E]/25"
+          className="mt-5 gradient-pink text-white px-8 py-3 rounded-full font-bold text-sm shadow-lg shadow-[#C4706E]/25 btn-playful font-display"
         >
           Done
         </button>

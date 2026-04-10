@@ -226,9 +226,9 @@ export default function WorkoutPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#FAF6F1]">
-        <div className="text-center">
-          <div className="w-10 h-10 border-[3px] border-[#C4706E] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-[#49443D]/40 text-sm font-medium">Loading your workout...</p>
+        <div className="text-center animate-bounce-in">
+          <span className="text-4xl block mb-3 animate-float">🐱</span>
+          <p className="text-[#49443D]/40 text-sm font-semibold font-display">Loading your workout...</p>
         </div>
       </div>
     );
@@ -237,9 +237,9 @@ export default function WorkoutPage() {
   if (error || !routine) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#FAF6F1] px-6">
-        <div className="text-center max-w-xs">
-          <span className="text-5xl block mb-4">🐱</span>
-          <h1 className="text-2xl font-extrabold text-[#49443D] mb-2">{error ? "Oops!" : "No Workout Yet"}</h1>
+        <div className="text-center max-w-xs animate-bounce-in">
+          <span className="text-6xl block mb-4 animate-float">🐱</span>
+          <h1 className="text-2xl font-bold text-[#49443D] mb-2 font-display">{error ? "Oops!" : "No Workout Yet"}</h1>
           <p className="text-[#49443D]/40">{error || "Jamie hasn't published a routine yet. Check back soon!"}</p>
         </div>
       </div>
@@ -266,7 +266,7 @@ export default function WorkoutPage() {
       )}
 
       {/* Header */}
-      <header className="bg-[#FFFDF9] border-b border-[#49443D]/5 pb-6">
+      <header className="bg-[#FFFDF9] border-b border-[#49443D]/5 pb-6 relative texture-grain overflow-hidden">
         <div className="max-w-2xl mx-auto px-5 pt-10 pb-2 flex items-start justify-between">
           <div>
             {/* Week navigator */}
@@ -293,7 +293,7 @@ export default function WorkoutPage() {
                 </svg>
               </button>
             </div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-[#49443D]">My Workout <span className="text-2xl">🐱</span></h1>
+            <h1 className="text-3xl font-bold tracking-tight text-[#49443D] font-display">My Workout <span className="text-2xl hover-wiggle inline-block cursor-default">🐱</span></h1>
             <p className="text-[#49443D]/30 text-sm mt-1">
               {totalExercises} exercise{totalExercises !== 1 ? "s" : ""} this week
               {(routine.repeatWeeks || 1) > 1 && (
@@ -336,11 +336,11 @@ export default function WorkoutPage() {
               const isToday = day === today;
               return (
                 <button key={day} onClick={() => { setSelectedDay(day); if (loggingMode) { setLoggingMode(false); setLogData({}); setNoteData({}); } }}
-                  className={`relative flex flex-col items-center min-w-[50px] px-3 py-3 rounded-2xl transition-all flex-shrink-0 ${
+                  className={`relative flex flex-col items-center min-w-[50px] px-3 py-3 rounded-2xl flex-shrink-0 hover-pop ${
                     isSelected ? "bg-[#C4706E] text-white shadow-lg shadow-[#C4706E]/30" : "bg-[#F5F0E8] text-[#49443D]/40 hover:bg-[#EDE6DA]"
                   }`}>
-                  <span className={`text-[10px] uppercase tracking-wider mb-0.5 ${isSelected ? "text-white/80" : "text-[#49443D]/25"}`}>{day.slice(0, 3)}</span>
-                  <span className="text-lg font-bold">{count || "–"}</span>
+                  <span className={`text-[10px] uppercase tracking-wider mb-0.5 font-bold ${isSelected ? "text-white/80" : "text-[#49443D]/25"}`}>{day.slice(0, 3)}</span>
+                  <span className="text-lg font-bold font-display">{count || "–"}</span>
                   {isToday && !isSelected && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#C4706E] rounded-full border-2 border-white" />}
                 </button>
               );
@@ -355,14 +355,14 @@ export default function WorkoutPage() {
 
         {/* Day heading + Start Workout button */}
         <div className="flex items-center gap-3 mb-5">
-          <h2 className="text-xl font-extrabold text-[#49443D]">{selectedDay}</h2>
+          <h2 className="text-xl font-bold text-[#49443D] font-display">{selectedDay}</h2>
           {selectedDay === today && (
             <span className="text-[10px] font-bold uppercase tracking-widest bg-[#C4706E] text-white px-2.5 py-1 rounded-full">Today</span>
           )}
           {exercises.length > 0 && !loggingMode && (
             <button
               onClick={() => setLoggingMode(true)}
-              className="ml-auto gradient-pink text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md shadow-[#C4706E]/20 hover:opacity-90 transition-all"
+              className="ml-auto gradient-pink text-white px-5 py-2.5 rounded-full text-xs font-bold shadow-md shadow-[#C4706E]/25 btn-playful font-display"
             >
               Start Workout
             </button>
@@ -379,9 +379,9 @@ export default function WorkoutPage() {
 
         {/* Exercises */}
         {exercises.length === 0 ? (
-          <div className="text-center py-20 bg-[#FFFDF9] rounded-3xl border border-[#49443D]/5">
-            <span className="text-4xl mb-4 block">😸</span>
-            <p className="text-[#49443D] text-lg font-bold">Rest Day</p>
+          <div className="text-center py-20 bg-[#FFFDF9] rounded-3xl border border-[#49443D]/5 shadow-playful animate-bounce-in">
+            <span className="text-5xl mb-4 block animate-float">😸</span>
+            <p className="text-[#49443D] text-lg font-bold font-display">Rest Day</p>
             <p className="text-[#49443D]/40 text-sm mt-1">Even Jiji takes a nap sometimes. You&apos;ve earned it.</p>
           </div>
         ) : (
@@ -448,7 +448,7 @@ export default function WorkoutPage() {
             <button
               onClick={handleFinishWorkout}
               disabled={saving}
-              className="gradient-pink text-white px-6 py-3 rounded-xl font-bold text-sm shadow-lg shadow-[#C4706E]/25 hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+              className="gradient-pink text-white px-6 py-3 rounded-full font-bold text-sm shadow-lg shadow-[#C4706E]/25 btn-playful disabled:opacity-40 disabled:cursor-not-allowed font-display"
             >
               {saving ? "Saving..." : "Finish Workout"}
             </button>

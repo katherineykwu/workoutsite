@@ -30,8 +30,8 @@ export default function PasswordGate({ onSuccess }: { onSuccess: () => void }) {
     <div className="min-h-screen flex items-center justify-center bg-[#F7F6F0] px-6">
       <form onSubmit={handleSubmit} className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <span className="text-5xl block mb-4">🦦</span>
-          <h1 className="text-2xl font-extrabold text-[#4A5D23] mb-1">Hey, Jamie!</h1>
+          <span className="text-6xl block mb-4 animate-float">🦦</span>
+          <h1 className="text-2xl font-bold text-[#4A5D23] mb-1 font-display">Hey, Jamie!</h1>
           <p className="text-[#4A5D23]/40 text-sm">Enter your password to get started</p>
         </div>
 
@@ -57,7 +57,7 @@ export default function PasswordGate({ onSuccess }: { onSuccess: () => void }) {
           <button
             type="submit"
             disabled={loading || !password}
-            className="w-full mt-4 bg-[#4A5D23] text-white py-3.5 rounded-xl font-bold hover:bg-[#3D4E1C] disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-[#4A5D23]/25"
+            className="w-full mt-4 bg-[#4A5D23] text-white py-3.5 rounded-full font-bold btn-playful disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-[#4A5D23]/25 font-display text-base"
           >
             {loading ? "Checking..." : "Let's Go!"}
           </button>
