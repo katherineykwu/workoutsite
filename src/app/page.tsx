@@ -7,7 +7,9 @@ import { getAllLogs, saveWorkoutLog, getPersonalBests } from "@/lib/workoutLogs"
 import type { Routine, DayOfWeek, SetLog, ExerciseLog, WorkoutLog, PersonalBest } from "@/lib/types";
 import { DAYS_OF_WEEK } from "@/lib/types";
 import ExerciseCard from "@/components/ExerciseCard";
+import SupersetCard from "@/components/SupersetCard";
 import EquipmentDisplay from "@/components/EquipmentDisplay";
+import { groupExercises } from "@/lib/groupExercises";
 import MyEquipmentModal from "@/components/MyEquipmentModal";
 import WorkoutToast from "@/components/WorkoutToast";
 import Link from "next/link";
@@ -344,20 +346,49 @@ export default function WorkoutPage() {
           </div>
         ) : (
           <div className="space-y-4 pb-24">
-            {exercises.map((exercise, index) => (
-              <ExerciseCard
-                key={exercise.id}
-                exercise={exercise}
-                index={index}
-                loggingMode={loggingMode}
-                currentSets={logData[exercise.id]}
-                lastSets={lastSession[exercise.id]}
-                personalBest={personalBests[exercise.name.toLowerCase().trim()]}
-                clientNote={noteData[exercise.id]}
-                onSetChange={handleSetChange}
-                onNoteChange={handleNoteChange}
-              />
-            ))}
+            {(() => {
+              const groups = groupExercises(exercises);
+              let globalIdx = 0;
+              return groups.map((group, gi) => {
+                const startIdx = globalIdx;
+                globalIdx += group.exercises.length;
+                const isSuperset = group.supersetGroup && group.exercises.length > 1;
+
+                if (isSuperset) {
+                  return (
+                    <SupersetCard
+                      key={`group-${gi}`}
+                      label={group.label}
+                      exercises={group.exercises}
+                      globalStartIndex={startIdx}
+                      loggingMode={loggingMode}
+                      logData={logData}
+                      lastSession={lastSession}
+                      personalBests={personalBests}
+                      noteData={noteData}
+                      onSetChange={handleSetChange}
+                      onNoteChange={handleNoteChange}
+                    />
+                  );
+                }
+
+                const exercise = group.exercises[0];
+                return (
+                  <ExerciseCard
+                    key={exercise.id}
+                    exercise={exercise}
+                    index={startIdx}
+                    loggingMode={loggingMode}
+                    currentSets={logData[exercise.id]}
+                    lastSets={lastSession[exercise.id]}
+                    personalBest={personalBests[exercise.name.toLowerCase().trim()]}
+                    clientNote={noteData[exercise.id]}
+                    onSetChange={handleSetChange}
+                    onNoteChange={handleNoteChange}
+                  />
+                );
+              });
+            })()}
           </div>
         )}
       </div>

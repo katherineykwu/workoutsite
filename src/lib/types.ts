@@ -10,6 +10,8 @@ export interface Exercise {
   notes: string;
   videoType: "youtube" | "upload" | "none";
   videoUrl: string;
+  supersetGroup?: string;  // e.g. "A", "B" — exercises sharing this value are grouped
+  supersetLabel?: string;  // section heading, e.g. "Pelvic Floor and Core Rehab"
 }
 
 export interface DayRoutine {

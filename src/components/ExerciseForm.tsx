@@ -17,6 +17,8 @@ export default function ExerciseForm({ exercise, routineId, onSave, onCancel }: 
   const [reps, setReps] = useState(exercise?.reps || "10");
   const [targetWeight, setTargetWeight] = useState(exercise?.targetWeight || 0);
   const [notes, setNotes] = useState(exercise?.notes || "");
+  const [supersetGroup, setSupersetGroup] = useState(exercise?.supersetGroup || "");
+  const [supersetLabel, setSupersetLabel] = useState(exercise?.supersetLabel || "");
   const [videoType, setVideoType] = useState<"youtube" | "upload" | "none">(exercise?.videoType || "none");
   const [videoUrl, setVideoUrl] = useState(exercise?.videoUrl || "");
   const [uploading, setUploading] = useState(false);
@@ -42,7 +44,10 @@ export default function ExerciseForm({ exercise, routineId, onSave, onCancel }: 
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    onSave({ id: exerciseId, name, sets, reps, restSeconds: 0, targetWeight, notes, videoType, videoUrl });
+    onSave({
+      id: exerciseId, name, sets, reps, restSeconds: 0, targetWeight, notes, videoType, videoUrl,
+      ...(supersetGroup ? { supersetGroup, supersetLabel } : {}),
+    });
   }
 
   const inputClass = "w-full px-4 py-3 bg-[#F5F3F4] border border-black/5 rounded-xl text-[#1A0A1F] placeholder-[#1A0A1F]/30 focus:outline-none focus:ring-2 focus:ring-[#4A5D23] focus:border-transparent transition-all";
@@ -78,6 +83,22 @@ export default function ExerciseForm({ exercise, routineId, onSave, onCancel }: 
         <label className="block text-sm font-semibold text-[#1A0A1F]/50 mb-1.5">Notes</label>
         <textarea value={notes} onChange={(e) => setNotes(e.target.value)}
           placeholder="e.g. Go below parallel, keep chest up" rows={2} className={inputClass + " resize-none"} />
+      </div>
+
+      {/* Superset grouping */}
+      <div className="border-t border-black/5 pt-5">
+        <label className="block text-sm font-semibold text-[#1A0A1F]/50 mb-1.5">
+          Superset Group <span className="font-normal text-[#1A0A1F]/30">(optional)</span>
+        </label>
+        <input type="text" value={supersetGroup} onChange={(e) => setSupersetGroup(e.target.value.toUpperCase())}
+          placeholder="e.g. A, B — same letter = same superset" maxLength={2} className={inputClass} />
+        {supersetGroup && (
+          <div className="mt-3">
+            <label className="block text-sm font-semibold text-[#1A0A1F]/50 mb-1.5">Section Label</label>
+            <input type="text" value={supersetLabel} onChange={(e) => setSupersetLabel(e.target.value)}
+              placeholder="e.g. Pelvic Floor and Core Rehab" className={inputClass} />
+          </div>
+        )}
       </div>
 
       <div>

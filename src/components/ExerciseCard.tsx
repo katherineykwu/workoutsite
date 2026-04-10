@@ -15,19 +15,20 @@ interface ExerciseCardProps {
   personalBest?: PersonalBest;
   onSetChange?: (exerciseId: string, setNumber: number, weight: number, reps: number) => void;
   onNoteChange?: (exerciseId: string, note: string) => void;
+  compact?: boolean; // renders without outer card styling (used inside SupersetCard)
 }
 
 export default function ExerciseCard({
-  exercise, index, loggingMode, currentSets, clientNote, lastSets, personalBest, onSetChange, onNoteChange,
+  exercise, index, loggingMode, currentSets, clientNote, lastSets, personalBest, onSetChange, onNoteChange, compact,
 }: ExerciseCardProps) {
   const currentMax = currentSets?.reduce((max, s) => Math.max(max, s.weight), 0) || 0;
   const isNewPR = loggingMode && personalBest && currentMax > personalBest.weight;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-black/5 overflow-hidden hover:shadow-md transition-shadow">
-      {!loggingMode && <VideoPlayer videoType={exercise.videoType} videoUrl={exercise.videoUrl} />}
+    <div className={compact ? "" : "bg-white rounded-2xl shadow-sm border border-black/5 overflow-hidden hover:shadow-md transition-shadow"}>
+      {!loggingMode && !compact && <VideoPlayer videoType={exercise.videoType} videoUrl={exercise.videoUrl} />}
 
-      <div className="p-5">
+      <div className={compact ? "py-2" : "p-5"}>
         <div className="flex items-start gap-3.5">
           <span className="flex-shrink-0 w-9 h-9 rounded-xl bg-[#C4706E] text-white flex items-center justify-center text-sm font-bold shadow-sm shadow-[#C4706E]/20">
             {index + 1}
