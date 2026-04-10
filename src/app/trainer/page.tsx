@@ -79,8 +79,8 @@ export default function TrainerPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center gradient-hero">
-        <div className="w-10 h-10 border-[3px] border-[#FF1A66] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-[#F7F6F0]">
+        <div className="w-10 h-10 border-[3px] border-[#4A5D23] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -157,22 +157,25 @@ export default function TrainerPage() {
   function showMsg(msg: string) { setMessage(msg); setTimeout(() => setMessage(""), 3000); }
 
   return (
-    <div className="min-h-screen bg-[#F5F3F4]">
-      {/* Header */}
-      <header className="border-b border-black/5 sticky top-0 z-10 bg-white/95 backdrop-blur-xl">
+    <div className="min-h-screen bg-[#F7F6F0]">
+      {/* Header — army green with personal welcome */}
+      <header className="border-b border-[#4A5D23]/10 sticky top-0 z-10 bg-white/95 backdrop-blur-xl">
         <div className="max-w-4xl mx-auto px-5 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-lg font-bold text-[#1A0A1F]">Trainer Dashboard</h1>
-            {activeRoutine && <p className="text-[#1A0A1F]/30 text-xs">Week of {activeRoutine.weekStart}</p>}
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🦦</span>
+            <div>
+              <h1 className="text-lg font-bold text-[#4A5D23]">Welcome, Jamie!</h1>
+              {activeRoutine && <p className="text-[#4A5D23]/40 text-xs">Week of {activeRoutine.weekStart}</p>}
+            </div>
           </div>
           <div className="flex items-center gap-3">
             {saving && (
-              <span className="text-xs text-[#1A0A1F]/40 flex items-center gap-1.5">
-                <span className="w-2 h-2 bg-[#FF1A66] rounded-full animate-pulse" />Saving...
+              <span className="text-xs text-[#4A5D23]/40 flex items-center gap-1.5">
+                <span className="w-2 h-2 bg-[#E8730C] rounded-full animate-pulse" />Saving...
               </span>
             )}
             {message && (
-              <span className="text-xs text-[#FF1A66] font-semibold bg-[#FF1A66]/10 px-3 py-1.5 rounded-full">
+              <span className="text-xs text-[#E8730C] font-semibold bg-[#E8730C]/10 px-3 py-1.5 rounded-full">
                 {message}
               </span>
             )}
@@ -186,30 +189,30 @@ export default function TrainerPage() {
           <select
             value={activeRoutine?.id || ""}
             onChange={(e) => handleSelectRoutine(e.target.value)}
-            className="px-4 py-2.5 bg-white border border-black/10 rounded-xl text-[#1A0A1F] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#FF1A66]"
+            className="px-4 py-2.5 bg-white border border-[#4A5D23]/15 rounded-xl text-[#1A0A1F] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#4A5D23]"
           >
             {routines.map((r) => (
               <option key={r.id} value={r.id}>Week of {r.weekStart}{r.published ? " (Live)" : ""}</option>
             ))}
           </select>
-          <button onClick={handleCreateNewWeek} className="px-4 py-2.5 bg-white border border-black/10 text-[#1A0A1F]/60 rounded-xl hover:bg-[#F5F3F4] text-sm font-semibold transition-colors">
+          <button onClick={handleCreateNewWeek} className="px-4 py-2.5 bg-white border border-[#4A5D23]/15 text-[#4A5D23]/60 rounded-xl hover:bg-[#4A5D23]/5 text-sm font-semibold transition-colors">
             + New Week
           </button>
           <button onClick={handleTogglePublish} className={`ml-auto px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
             activeRoutine?.published
-              ? "bg-white text-[#FF1A66] border border-[#FF1A66]/30 hover:bg-[#FF1A66]/5"
-              : "gradient-pink text-white shadow-lg shadow-[#FF1A66]/25 hover:opacity-90"
+              ? "bg-white text-[#E8730C] border border-[#E8730C]/30 hover:bg-[#E8730C]/5"
+              : "bg-[#4A5D23] text-white shadow-lg shadow-[#4A5D23]/25 hover:bg-[#3D4E1C]"
           }`}>
             {activeRoutine?.published ? "Unpublish" : "Publish Routine"}
           </button>
         </div>
 
         {/* Tab switcher */}
-        <div className="flex gap-1 bg-[#EAE6E8] p-1 rounded-xl mb-6 w-fit">
+        <div className="flex gap-1 bg-[#4A5D23]/8 p-1 rounded-xl mb-6 w-fit">
           {(["exercises", "equipment", "activity"] as TrainerTab[]).map((tab) => (
             <button key={tab} onClick={() => setTrainerTab(tab)}
               className={`px-5 py-2.5 rounded-lg text-sm font-semibold capitalize transition-all ${
-                trainerTab === tab ? "bg-[#FF1A66] text-white shadow-md" : "text-[#1A0A1F]/40 hover:text-[#1A0A1F]/60"
+                trainerTab === tab ? "bg-[#4A5D23] text-white shadow-md" : "text-[#4A5D23]/40 hover:text-[#4A5D23]/60"
               }`}
             >{tab}</button>
           ))}
@@ -220,7 +223,7 @@ export default function TrainerPage() {
           <div>
             <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="text-[#FF1A66] text-xs font-bold uppercase tracking-[0.15em] mb-1">Client&apos;s Equipment</p>
+                <p className="text-[#E8730C] text-xs font-bold uppercase tracking-[0.15em] mb-1">Client&apos;s Equipment</p>
                 <p className="text-[#1A0A1F]/40 text-sm">What Katherine has access to right now</p>
               </div>
               <button onClick={() => fetchClientEquipment().then((d) => { setClientEquipment(d.equipment || []); setClientGymPhotos(d.gymPhotos || []); })}
@@ -240,11 +243,11 @@ export default function TrainerPage() {
             {/* Gym photos from client */}
             {clientGymPhotos.length > 0 && (
               <div className="mt-6">
-                <p className="text-[#FF1A66] text-xs font-bold uppercase tracking-[0.15em] mb-2">Gym Photos</p>
+                <p className="text-[#E8730C] text-xs font-bold uppercase tracking-[0.15em] mb-2">Gym Photos</p>
                 <p className="text-[#1A0A1F]/40 text-sm mb-4">Photos from Katherine&apos;s gym</p>
                 <div className="grid grid-cols-2 gap-3">
                   {clientGymPhotos.map((url, i) => (
-                    <div key={i} className="rounded-2xl overflow-hidden bg-[#F5F3F4] aspect-[4/3] border border-black/5 shadow-sm">
+                    <div key={i} className="rounded-2xl overflow-hidden bg-[#F7F6F0] aspect-[4/3] border border-black/5 shadow-sm">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={url} alt={`Client gym photo ${i + 1}`} className="w-full h-full object-cover" />
                     </div>
@@ -261,12 +264,12 @@ export default function TrainerPage() {
             {/* Personal Bests summary */}
             {Object.keys(clientPBs).length > 0 && (
               <div>
-                <p className="text-[#FF1A66] text-xs font-bold uppercase tracking-[0.15em] mb-2">Personal Records</p>
+                <p className="text-[#E8730C] text-xs font-bold uppercase tracking-[0.15em] mb-2">Personal Records</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                   {Object.values(clientPBs).sort((a, b) => b.weight - a.weight).map((pb) => (
-                    <div key={pb.exerciseName} className="bg-white rounded-xl border border-black/5 shadow-sm p-3 border-l-4 border-l-[#FF1A66]">
+                    <div key={pb.exerciseName} className="bg-white rounded-xl border border-black/5 shadow-sm p-3 border-l-4 border-l-[#4A5D23]">
                       <p className="text-xs font-bold text-[#1A0A1F] truncate">{pb.displayName}</p>
-                      <p className="text-lg font-extrabold text-[#FF1A66]">{pb.weight} <span className="text-xs text-[#1A0A1F]/30">lbs</span></p>
+                      <p className="text-lg font-extrabold text-[#E8730C]">{pb.weight} <span className="text-xs text-[#1A0A1F]/30">lbs</span></p>
                       <p className="text-[10px] text-[#1A0A1F]/30">{pb.reps} reps · {pb.date}</p>
                     </div>
                   ))}
@@ -277,7 +280,7 @@ export default function TrainerPage() {
             {/* Workout logs */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <p className="text-[#FF1A66] text-xs font-bold uppercase tracking-[0.15em]">Workout History</p>
+                <p className="text-[#E8730C] text-xs font-bold uppercase tracking-[0.15em]">Workout History</p>
                 <button onClick={loadClientActivity} className="text-xs text-[#1A0A1F]/30 hover:text-[#1A0A1F]/60 font-medium transition-colors">
                   Refresh
                 </button>
@@ -285,8 +288,8 @@ export default function TrainerPage() {
 
               {workoutLogs.length === 0 ? (
                 <div className="text-center py-12 bg-white rounded-2xl border border-black/5">
-                  <span className="text-3xl mb-3 block">📋</span>
-                  <p className="text-[#1A0A1F]/30 text-sm">No workouts logged yet</p>
+                  <span className="text-3xl mb-3 block">🦦</span>
+                  <p className="text-[#1A0A1F]/30 text-sm">Katherine hasn&apos;t logged any workouts yet</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -307,17 +310,17 @@ export default function TrainerPage() {
                               <p className="text-sm font-semibold text-[#1A0A1F]">{ex.exerciseName}</p>
                               <div className="flex flex-wrap gap-1.5 mt-1.5">
                                 {ex.sets.map((set) => (
-                                  <span key={set.setNumber} className="text-xs bg-[#F5F3F4] text-[#1A0A1F]/60 px-2.5 py-1 rounded-lg font-medium">
+                                  <span key={set.setNumber} className="text-xs bg-[#F7F6F0] text-[#1A0A1F]/60 px-2.5 py-1 rounded-lg font-medium">
                                     {set.weight} lbs × {set.reps}
                                   </span>
                                 ))}
                               </div>
                               {ex.clientNote && (
-                                <div className="mt-2 flex items-start gap-2 bg-[#FF1A66]/5 rounded-lg px-3 py-2">
-                                  <svg className="w-3.5 h-3.5 text-[#FF1A66] mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <div className="mt-2 flex items-start gap-2 bg-[#4A5D23]/5 rounded-lg px-3 py-2">
+                                  <svg className="w-3.5 h-3.5 text-[#E8730C] mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
                                   </svg>
-                                  <p className="text-xs text-[#FF1A66] font-medium leading-relaxed">{ex.clientNote}</p>
+                                  <p className="text-xs text-[#E8730C] font-medium leading-relaxed">{ex.clientNote}</p>
                                 </div>
                               )}
                             </div>
@@ -343,8 +346,8 @@ export default function TrainerPage() {
                   <button key={day} onClick={() => { setSelectedDay(day); setShowForm(false); setEditingExercise(undefined); }}
                     className={`px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all flex-shrink-0 ${
                       selectedDay === day
-                        ? "bg-[#FF1A66] text-white shadow-md shadow-[#FF1A66]/25"
-                        : "bg-white border border-black/5 text-[#1A0A1F]/40 hover:bg-[#F5F3F4]"
+                        ? "bg-[#4A5D23] text-white shadow-md shadow-[#E8730C]/25"
+                        : "bg-white border border-black/5 text-[#1A0A1F]/40 hover:bg-[#F7F6F0]"
                     }`}>
                     {day}{count > 0 && <span className="ml-1.5 text-xs opacity-60">({count})</span>}
                   </button>
@@ -356,10 +359,10 @@ export default function TrainerPage() {
             <div className="space-y-3">
               {exercises.length === 0 && !showForm && (
                 <div className="text-center py-16 bg-white rounded-2xl border-2 border-dashed border-black/10">
-                  <span className="text-4xl mb-4 block">🏋️</span>
-                  <p className="text-[#1A0A1F]/30 mb-4">No exercises for {selectedDay} yet</p>
+                  <span className="text-4xl mb-4 block">🦦</span>
+                  <p className="text-[#1A0A1F]/30 mb-4">No exercises for {selectedDay} yet — time to build!</p>
                   <button onClick={() => { setEditingExercise(undefined); setShowForm(true); }}
-                    className="gradient-pink text-white px-6 py-3 rounded-xl font-bold hover:opacity-90 transition-all shadow-lg shadow-[#FF1A66]/25">
+                    className="bg-[#4A5D23] text-white px-6 py-3 rounded-xl font-bold hover:opacity-90 transition-all shadow-lg shadow-[#E8730C]/25">
                     Add First Exercise
                   </button>
                 </div>
@@ -369,7 +372,7 @@ export default function TrainerPage() {
                 <div key={exercise.id} className="bg-white rounded-2xl border border-black/5 shadow-sm p-5 hover:shadow-md transition-shadow">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-3 flex-1 min-w-0">
-                      <span className="flex-shrink-0 w-8 h-8 rounded-lg bg-[#FF1A66] text-white flex items-center justify-center text-sm font-bold">
+                      <span className="flex-shrink-0 w-8 h-8 rounded-lg bg-[#4A5D23] text-white flex items-center justify-center text-sm font-bold">
                         {index + 1}
                       </span>
                       <div className="flex-1 min-w-0">
@@ -378,7 +381,7 @@ export default function TrainerPage() {
                           <span className="font-medium">{exercise.sets} sets</span>
                           <span className="text-[#1A0A1F]/20">|</span>
                           <span className="font-medium">{exercise.reps} reps</span>
-                          {exercise.targetWeight > 0 && (<><span className="text-[#1A0A1F]/20">|</span><span className="font-medium text-[#FF1A66]">{exercise.targetWeight} lbs</span></>)}
+                          {exercise.targetWeight > 0 && (<><span className="text-[#1A0A1F]/20">|</span><span className="font-medium text-[#E8730C]">{exercise.targetWeight} lbs</span></>)}
                           {exercise.restSeconds > 0 && (<><span className="text-[#1A0A1F]/20">|</span><span className="font-medium">{exercise.restSeconds}s rest</span></>)}
                         </div>
                         {exercise.notes && <p className="text-sm text-[#1A0A1F]/30 mt-1.5 italic">{exercise.notes}</p>}
@@ -391,15 +394,15 @@ export default function TrainerPage() {
                     </div>
                     <div className="flex items-center gap-1">
                       <button onClick={() => handleMoveExercise(exercise.id, "up")} disabled={index === 0}
-                        className="p-2 text-[#1A0A1F]/20 hover:text-[#1A0A1F]/60 hover:bg-[#F5F3F4] rounded-lg disabled:opacity-20 transition-colors">
+                        className="p-2 text-[#1A0A1F]/20 hover:text-[#1A0A1F]/60 hover:bg-[#F7F6F0] rounded-lg disabled:opacity-20 transition-colors">
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" /></svg>
                       </button>
                       <button onClick={() => handleMoveExercise(exercise.id, "down")} disabled={index === exercises.length - 1}
-                        className="p-2 text-[#1A0A1F]/20 hover:text-[#1A0A1F]/60 hover:bg-[#F5F3F4] rounded-lg disabled:opacity-20 transition-colors">
+                        className="p-2 text-[#1A0A1F]/20 hover:text-[#1A0A1F]/60 hover:bg-[#F7F6F0] rounded-lg disabled:opacity-20 transition-colors">
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
                       </button>
                       <button onClick={() => { setEditingExercise(exercise); setShowForm(true); }}
-                        className="p-2 text-[#FF1A66]/50 hover:text-[#FF1A66] hover:bg-[#FF1A66]/5 rounded-lg transition-colors">
+                        className="p-2 text-[#E8730C]/50 hover:text-[#E8730C] hover:bg-[#4A5D23]/5 rounded-lg transition-colors">
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
                       </button>
                       <button onClick={() => handleDeleteExercise(exercise.id)}
@@ -413,7 +416,7 @@ export default function TrainerPage() {
 
               {exercises.length > 0 && !showForm && (
                 <button onClick={() => { setEditingExercise(undefined); setShowForm(true); }}
-                  className="w-full py-4 border-2 border-dashed border-black/10 rounded-2xl text-[#1A0A1F]/30 hover:text-[#FF1A66] hover:border-[#FF1A66]/30 hover:bg-[#FF1A66]/5 font-semibold transition-all">
+                  className="w-full py-4 border-2 border-dashed border-black/10 rounded-2xl text-[#1A0A1F]/30 hover:text-[#E8730C] hover:border-[#E8730C]/30 hover:bg-[#4A5D23]/5 font-semibold transition-all">
                   + Add Exercise
                 </button>
               )}

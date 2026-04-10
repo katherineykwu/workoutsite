@@ -46,7 +46,7 @@ export default function ExerciseForm({ exercise, routineId, onSave, onCancel }: 
     onSave({ id: exerciseId, name, sets, reps, restSeconds, targetWeight, notes, videoType, videoUrl });
   }
 
-  const inputClass = "w-full px-4 py-3 bg-[#F5F3F4] border border-black/5 rounded-xl text-[#1A0A1F] placeholder-[#1A0A1F]/30 focus:outline-none focus:ring-2 focus:ring-[#FF1A66] focus:border-transparent transition-all";
+  const inputClass = "w-full px-4 py-3 bg-[#F5F3F4] border border-black/5 rounded-xl text-[#1A0A1F] placeholder-[#1A0A1F]/30 focus:outline-none focus:ring-2 focus:ring-[#4A5D23] focus:border-transparent transition-all";
 
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-black/5 shadow-sm p-6 space-y-5">
@@ -93,7 +93,7 @@ export default function ExerciseForm({ exercise, routineId, onSave, onCancel }: 
               onClick={() => { setVideoType(type); if (type !== videoType) setVideoUrl(""); }}
               className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
                 videoType === type
-                  ? "bg-[#FF1A66] text-white shadow-md shadow-[#FF1A66]/20"
+                  ? "bg-[#4A5D23] text-white shadow-md shadow-[#4A5D23]/20"
                   : "bg-[#F5F3F4] border border-black/5 text-[#1A0A1F]/40 hover:bg-[#EAE6E8]"
               }`}>
               {type === "none" ? "No Video" : type === "youtube" ? "YouTube" : "Upload"}
@@ -110,14 +110,14 @@ export default function ExerciseForm({ exercise, routineId, onSave, onCancel }: 
       {videoType === "upload" && (
         <div>
           <input type="file" accept="video/*" onChange={handleFileUpload} disabled={uploading}
-            className="w-full text-sm text-[#1A0A1F]/40 file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-[#FF1A66] file:text-white hover:file:opacity-80 file:transition-opacity file:cursor-pointer" />
-          {uploadProgress && <p className={`text-sm mt-2 ${videoUrl ? "text-[#FF1A66]" : "text-[#1A0A1F]/30"}`}>{uploadProgress}</p>}
+            className="w-full text-sm text-[#1A0A1F]/40 file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-[#4A5D23] file:text-white hover:file:opacity-80 file:transition-opacity file:cursor-pointer" />
+          {uploadProgress && <p className={`text-sm mt-2 ${videoUrl ? "text-[#4A5D23]" : "text-[#1A0A1F]/30"}`}>{uploadProgress}</p>}
         </div>
       )}
 
       <div className="flex gap-3 pt-2">
         <button type="submit" disabled={!name || uploading}
-          className="gradient-pink text-white px-6 py-3 rounded-xl font-bold hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-[#FF1A66]/20">
+          className="bg-[#4A5D23] text-white px-6 py-3 rounded-xl font-bold hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-[#4A5D23]/20">
           {exercise ? "Save Changes" : "Add Exercise"}
         </button>
         <button type="button" onClick={onCancel}
