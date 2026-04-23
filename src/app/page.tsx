@@ -166,6 +166,19 @@ export default function WorkoutPage() {
   const canGoPrev = routine && allRoutines.findIndex((r) => r.id === routine.id) < allRoutines.length - 1;
   const canGoNext = routine && allRoutines.findIndex((r) => r.id === routine.id) > 0;
 
+  // Jump to the current week's routine (or the most recent one if none exists for this week)
+  function jumpToCurrent() {
+    if (allRoutines.length === 0) return;
+    const currentMonday = getCurrentWeekMonday();
+    const target = allRoutines.find((r) => r.weekStart === currentMonday) || allRoutines[0];
+    setRoutine(target);
+    setIsCurrentWeek(target.weekStart === currentMonday);
+    setSelectedDay(getTodayName());
+    setLoggingMode(false);
+    setLogData({});
+    setNoteData({});
+  }
+
   async function handleSaveEquipment(equipment: string[], photos: string[]) {
     setMyEquipment(equipment);
     setGymPhotos(photos);
@@ -301,7 +314,14 @@ export default function WorkoutPage() {
                   (repeats {routine.repeatWeeks} weeks)
                 </span>
               )}
-              {!isCurrentWeek && !(routine.repeatWeeks && routine.repeatWeeks > 1) && <span className="text-[#C4706E] ml-1.5">(past week)</span>}
+              {!isCurrentWeek && !(routine.repeatWeeks && routine.repeatWeeks > 1) && (
+                <button
+                  onClick={jumpToCurrent}
+                  className="text-[#C4706E] ml-1.5 underline underline-offset-2 decoration-dotted hover:decoration-solid transition-all"
+                >
+                  past week · jump to today →
+                </button>
+              )}
             </p>
           </div>
           <div className="flex gap-2 mt-2">
