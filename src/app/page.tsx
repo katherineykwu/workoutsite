@@ -347,21 +347,36 @@ export default function WorkoutPage() {
           </div>
         </div>
 
-        {/* Day selector */}
+        {/* Day selector — shows the calendar date; exercise count sits as a small badge */}
         <div className="max-w-2xl mx-auto px-5 mt-5">
           <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-            {DAYS_OF_WEEK.map((day) => {
+            {DAYS_OF_WEEK.map((day, dayIdx) => {
               const count = routine.days[day]?.exercises?.length || 0;
               const isSelected = selectedDay === day;
               const isToday = day === today;
+              // Compute the calendar day number for this day of the week
+              const weekStartDate = new Date(routine.weekStart + "T00:00:00");
+              const thisDate = new Date(weekStartDate);
+              thisDate.setDate(weekStartDate.getDate() + dayIdx);
+              const dayNum = thisDate.getDate();
               return (
                 <button key={day} onClick={() => { setSelectedDay(day); if (loggingMode) { setLoggingMode(false); setLogData({}); setNoteData({}); } }}
                   className={`relative flex flex-col items-center min-w-[50px] px-3 py-3 rounded-2xl flex-shrink-0 hover-pop ${
                     isSelected ? "bg-[#C4706E] text-white shadow-lg shadow-[#C4706E]/30" : "bg-[#F5F0E8] text-[#49443D]/40 hover:bg-[#EDE6DA]"
                   }`}>
                   <span className={`text-[10px] uppercase tracking-wider mb-0.5 font-bold ${isSelected ? "text-white/80" : "text-[#49443D]/25"}`}>{day.slice(0, 3)}</span>
-                  <span className="text-lg font-bold font-display">{count || "–"}</span>
-                  {isToday && !isSelected && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#C4706E] rounded-full border-2 border-white" />}
+                  <span className={`text-lg font-bold font-display ${isSelected ? "text-white" : "text-[#49443D]/70"}`}>{dayNum}</span>
+                  {/* Exercise count badge — small dot with number, top-right */}
+                  {count > 0 && (
+                    <span className={`absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center ${
+                      isSelected ? "bg-white text-[#C4706E]" : "bg-[#C4706E] text-white"
+                    }`}>
+                      {count}
+                    </span>
+                  )}
+                  {isToday && !isSelected && count === 0 && (
+                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#C4706E] rounded-full border-2 border-white" />
+                  )}
                 </button>
               );
             })}
