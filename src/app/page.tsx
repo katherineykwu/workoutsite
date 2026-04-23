@@ -227,7 +227,7 @@ export default function WorkoutPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#FAF6F1]">
         <div className="text-center animate-bounce-in">
-          <span className="text-4xl block mb-3 animate-float">🐱</span>
+          <span className="text-4xl block mb-3 animate-float">🐈‍⬛</span>
           <p className="text-[#49443D]/40 text-sm font-semibold font-display">Loading your workout...</p>
         </div>
       </div>
@@ -238,7 +238,7 @@ export default function WorkoutPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#FAF6F1] px-6">
         <div className="text-center max-w-xs animate-bounce-in">
-          <span className="text-6xl block mb-4 animate-float">🐱</span>
+          <span className="text-6xl block mb-4 animate-float">🐈‍⬛</span>
           <h1 className="text-2xl font-bold text-[#49443D] mb-2 font-display">{error ? "Oops!" : "No Workout Yet"}</h1>
           <p className="text-[#49443D]/40">{error || "Jamie hasn't published a routine yet. Check back soon!"}</p>
         </div>
@@ -293,7 +293,7 @@ export default function WorkoutPage() {
                 </svg>
               </button>
             </div>
-            <h1 className="text-3xl font-bold tracking-tight text-[#49443D] font-display">My Workout <span className="text-2xl hover-wiggle inline-block cursor-default">🐱</span></h1>
+            <h1 className="text-3xl font-bold tracking-tight text-[#49443D] font-display">My Workout <span className="text-2xl hover-pop inline-block cursor-default">🐈‍⬛</span></h1>
             <p className="text-[#49443D]/30 text-sm mt-1">
               {totalExercises} exercise{totalExercises !== 1 ? "s" : ""} this week
               {(routine.repeatWeeks || 1) > 1 && (
@@ -380,7 +380,7 @@ export default function WorkoutPage() {
         {/* Exercises */}
         {exercises.length === 0 ? (
           <div className="text-center py-20 bg-[#FFFDF9] rounded-3xl border border-[#49443D]/5 shadow-playful animate-bounce-in">
-            <span className="text-5xl mb-4 block animate-float">😸</span>
+            <span className="text-5xl mb-4 block animate-float">🐈‍⬛</span>
             <p className="text-[#49443D] text-lg font-bold font-display">Rest Day</p>
             <p className="text-[#49443D]/40 text-sm mt-1">Even Jiji takes a nap sometimes. You&apos;ve earned it.</p>
           </div>

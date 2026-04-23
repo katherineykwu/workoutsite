@@ -2,7 +2,7 @@
 
 @theme inline {
   --font-sans: var(--font-nunito);
-  --font-display: var(--font-fredoka);
+  --font-display: var(--font-fraunces);
 }
 
 html {
@@ -72,9 +72,13 @@ input[type="number"] {
   padding-bottom: calc(1rem + env(safe-area-inset-bottom));
 }
 
-/* Display font for headings */
+/* Display font for headings — Fraunces variable serif.
+   Use opsz 48 at large sizes for beautiful high-contrast strokes,
+   SOFT 50 for gently softened terminals (warm but not cute). */
 .font-display {
-  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-family: var(--font-display), Georgia, serif;
+  font-variation-settings: "opsz" 48, "SOFT" 50;
+  letter-spacing: -0.01em;
 }
 
 /* Scrollbar hide */

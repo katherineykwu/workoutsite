@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Nunito, Fredoka } from "next/font/google";
+import { Nunito, Fraunces } from "next/font/google";
 import "./globals.css";
 
 const nunito = Nunito({
@@ -8,34 +8,32 @@ const nunito = Nunito({
   weight: ["400", "500", "600", "700", "800", "900"],
 });
 
-const fredoka = Fredoka({
-  variable: "--font-fredoka",
+// Fraunces — variable serif with warmth. Editorial, sophisticated.
+// Using the full variable font so we can vary weight, opsz, and SOFT axis
+// through font-variation-settings in globals.css.
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  axes: ["SOFT", "opsz"],
 });
 
 export const viewport: Viewport = {
-  // Edge-to-edge on iPhone (behind the notch and home indicator)
   viewportFit: "cover",
-  // Prevent accidental pinch-zoom while allowing user zoom with double-tap
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
-  // Status bar color on iOS / address bar on Android matches cream theme
   themeColor: "#FAF6F1",
 };
 
 export const metadata: Metadata = {
-  title: "My Workout 🐱",
+  title: "My Workout",
   description: "Weekly workout routines from Jamie",
-  // When "Add to Home Screen" on iOS, this title shows below the icon
   appleWebApp: {
     capable: true,
     title: "My Workout",
     statusBarStyle: "default",
   },
-  // Disable iOS auto-formatting that converts numbers to phone links
   formatDetection: {
     telephone: false,
   },
@@ -47,7 +45,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${nunito.variable} ${fredoka.variable} h-full antialiased`}>
+    <html lang="en" className={`${nunito.variable} ${fraunces.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
