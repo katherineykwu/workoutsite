@@ -45,6 +45,19 @@ export const EQUIPMENT_OPTIONS: EquipmentItem[] = [
   { id: "leg-press", name: "Leg Press", icon: "🦵" },
 ];
 
+// A named, reusable workout that the trainer can drop onto any day/week.
+// Applying a template creates a fresh copy of its exercises on the target day
+// (exercise IDs are regenerated) — future edits to the template do not
+// retroactively change days it was previously applied to.
+export interface WorkoutTemplate {
+  id: string;
+  name: string;
+  exercises: Exercise[];
+  equipment?: string[];
+  createdAt: number;
+  updatedAt: number;
+}
+
 export interface Routine {
   id: string;
   weekStart: string; // ISO date string for the Monday of that week

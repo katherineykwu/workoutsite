@@ -9,11 +9,17 @@ import ProgressChart from "@/components/ProgressChart";
 import VideoPlayer from "@/components/VideoPlayer";
 import WorkoutHistoryItem from "@/components/WorkoutHistoryItem";
 import ExerciseSearchBox from "@/components/ExerciseSearchBox";
+import TemplateCard from "@/components/TemplateCard";
+import TemplatePicker from "@/components/TemplatePicker";
 import {
   getAllRoutines, saveRoutine, getRoutine, createBlankRoutine, getCurrentWeekMonday,
 } from "@/lib/routines";
 import { getAllLogs, getPersonalBests } from "@/lib/workoutLogs";
-import type { Routine, Exercise, DayOfWeek, WorkoutLog, PersonalBest } from "@/lib/types";
+import {
+  getAllTemplates, saveTemplate, deleteTemplate,
+  templateFromExercises, duplicateTemplate, exercisesFromTemplate,
+} from "@/lib/workoutTemplates";
+import type { Routine, Exercise, DayOfWeek, WorkoutLog, PersonalBest, WorkoutTemplate } from "@/lib/types";
 import { DAYS_OF_WEEK } from "@/lib/types";
 import { groupExercises } from "@/lib/groupExercises";
 import { matchesQuery } from "@/lib/filterBySearch";
@@ -22,7 +28,7 @@ const PB_DEFAULT_LIMIT = 6;
 const PILL_DEFAULT_LIMIT = 8;
 const HISTORY_PAGE_SIZE = 10;
 
-type TrainerTab = "exercises" | "equipment" | "activity";
+type TrainerTab = "exercises" | "equipment" | "activity" | "templates";
 
 // Fetch client's equipment selection + gym photos
 async function fetchClientEquipment(): Promise<{ equipment: string[]; gymPhotos: string[] }> {
@@ -54,6 +60,14 @@ export default function TrainerPage() {
   const [activityPillsExpanded, setActivityPillsExpanded] = useState(false);
   const [activityHistoryLimit, setActivityHistoryLimit] = useState(HISTORY_PAGE_SIZE);
 
+  // Templates
+  const [templates, setTemplates] = useState<WorkoutTemplate[]>([]);
+  const [showTemplatePicker, setShowTemplatePicker] = useState(false);
+  // When editing a template, this holds the in-progress template.
+  // null = viewing the Templates list; non-null = editing template exercises.
+  const [editingTemplate, setEditingTemplate] = useState<WorkoutTemplate | null>(null);
+  const [templateSearchQuery, setTemplateSearchQuery] = useState("");
+
   useEffect(() => {
     if (sessionStorage.getItem("trainer-auth") === "true") setAuthenticated(true);
   }, []);
@@ -81,15 +95,23 @@ export default function TrainerPage() {
   useEffect(() => { if (authenticated) loadRoutines(); }, [authenticated, loadRoutines]);
 
   useEffect(() => {
-    if (authenticated && (trainerTab === "activity" || trainerTab === "equipment")) {
-      if (trainerTab === "activity" && workoutLogs.length === 0) {
-        loadClientActivity();
-      }
-      if (trainerTab === "equipment" && clientEquipment.length === 0) {
-        fetchClientEquipment().then((d) => { setClientEquipment(d.equipment || []); setClientGymPhotos(d.gymPhotos || []); });
-      }
+    if (!authenticated) return;
+    if (trainerTab === "activity" && workoutLogs.length === 0) {
+      loadClientActivity();
+    }
+    if (trainerTab === "equipment" && clientEquipment.length === 0) {
+      fetchClientEquipment().then((d) => { setClientEquipment(d.equipment || []); setClientGymPhotos(d.gymPhotos || []); });
+    }
+    if (trainerTab === "templates" && templates.length === 0) {
+      loadTemplates();
     }
   }, [authenticated, trainerTab]);
+
+  // Also fetch templates on login so the "Apply template" picker on the
+  // Exercises tab has something to show immediately.
+  useEffect(() => {
+    if (authenticated) loadTemplates();
+  }, [authenticated]);
 
   if (!authenticated) return <PasswordGate onSuccess={() => setAuthenticated(true)} />;
 
@@ -176,6 +198,128 @@ export default function TrainerPage() {
 
   function showMsg(msg: string) { setMessage(msg); setTimeout(() => setMessage(""), 3000); }
 
+  // ---- Template handlers ----
+  async function loadTemplates() {
+    const list = await getAllTemplates();
+    setTemplates(list);
+  }
+
+  async function handleSaveDayAsTemplate() {
+    if (!activeRoutine) return;
+    const dayExercises = activeRoutine.days[selectedDay]?.exercises || [];
+    if (dayExercises.length === 0) {
+      showMsg("Nothing to save — add some exercises first.");
+      return;
+    }
+    const name = prompt(`Save ${selectedDay}'s exercises as a template. Name?`);
+    if (!name || !name.trim()) return;
+    const newTpl = templateFromExercises(name, dayExercises, activeRoutine.equipment);
+    setSaving(true);
+    await saveTemplate(newTpl);
+    setTemplates((prev) => [newTpl, ...prev]);
+    setSaving(false);
+    showMsg(`Saved "${newTpl.name}" as a template`);
+  }
+
+  async function handleApplyTemplate(template: WorkoutTemplate) {
+    if (!activeRoutine) return;
+    const copied = exercisesFromTemplate(template);
+    const updated = { ...activeRoutine };
+    updated.days[selectedDay] = { exercises: copied };
+    setActiveRoutine(updated);
+    setShowTemplatePicker(false);
+    setSaving(true);
+    await saveRoutine(updated);
+    setSaving(false);
+    showMsg(`Applied "${template.name}" to ${selectedDay}`);
+  }
+
+  async function handleDuplicateTemplate(template: WorkoutTemplate) {
+    const copy = duplicateTemplate(template);
+    setSaving(true);
+    await saveTemplate(copy);
+    setTemplates((prev) => [copy, ...prev]);
+    setSaving(false);
+    showMsg(`Duplicated as "${copy.name}"`);
+  }
+
+  async function handleRenameTemplate(template: WorkoutTemplate) {
+    const newName = prompt("Rename template:", template.name);
+    if (!newName || !newName.trim() || newName.trim() === template.name) return;
+    const updated = { ...template, name: newName.trim(), updatedAt: Date.now() };
+    setSaving(true);
+    await saveTemplate(updated);
+    setTemplates((prev) => prev.map((t) => (t.id === template.id ? updated : t)));
+    setSaving(false);
+    showMsg("Renamed.");
+  }
+
+  async function handleDeleteTemplate(template: WorkoutTemplate) {
+    if (!confirm(`Delete template "${template.name}"? This won't affect days it was already applied to.`)) return;
+    setSaving(true);
+    await deleteTemplate(template.id);
+    setTemplates((prev) => prev.filter((t) => t.id !== template.id));
+    setSaving(false);
+    showMsg("Template deleted.");
+  }
+
+  async function handleCreateNewTemplate() {
+    const name = prompt("New template name:");
+    if (!name || !name.trim()) return;
+    const now = Date.now();
+    const newTpl: WorkoutTemplate = {
+      id: `tpl-${now}-${Math.random().toString(36).slice(2, 7)}`,
+      name: name.trim(),
+      exercises: [],
+      createdAt: now,
+      updatedAt: now,
+    };
+    setSaving(true);
+    await saveTemplate(newTpl);
+    setTemplates((prev) => [newTpl, ...prev]);
+    setSaving(false);
+    setEditingTemplate(newTpl);
+  }
+
+  // When editing a template, exercise CRUD writes back to the template (not a routine)
+  async function handleSaveTemplateExercise(exercise: Exercise) {
+    if (!editingTemplate) return;
+    const exercises = [...editingTemplate.exercises];
+    const idx = exercises.findIndex((e) => e.id === exercise.id);
+    if (idx >= 0) exercises[idx] = exercise; else exercises.push(exercise);
+    const updated = { ...editingTemplate, exercises, updatedAt: Date.now() };
+    setEditingTemplate(updated);
+    setShowForm(false); setEditingExercise(undefined);
+    setSaving(true);
+    await saveTemplate(updated);
+    setTemplates((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
+    setSaving(false);
+    showMsg("Exercise saved.");
+  }
+
+  async function handleDeleteTemplateExercise(exerciseId: string) {
+    if (!editingTemplate) return;
+    const updated = { ...editingTemplate, exercises: editingTemplate.exercises.filter((e) => e.id !== exerciseId), updatedAt: Date.now() };
+    setEditingTemplate(updated);
+    setSaving(true);
+    await saveTemplate(updated);
+    setTemplates((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
+    setSaving(false);
+  }
+
+  async function handleMoveTemplateExercise(exerciseId: string, dir: "up" | "down") {
+    if (!editingTemplate) return;
+    const arr = [...editingTemplate.exercises];
+    const i = arr.findIndex((e) => e.id === exerciseId);
+    const j = dir === "up" ? i - 1 : i + 1;
+    if (i < 0 || j < 0 || j >= arr.length) return;
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+    const updated = { ...editingTemplate, exercises: arr, updatedAt: Date.now() };
+    setEditingTemplate(updated);
+    await saveTemplate(updated);
+    setTemplates((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
+  }
+
   return (
     <div className="min-h-screen bg-[#F7F6F0]">
       {/* Header — army green with personal welcome */}
@@ -212,31 +356,12 @@ export default function TrainerPage() {
             className="px-4 py-2.5 bg-white border border-[#4A5D23]/15 rounded-xl text-[#1A0A1F] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#4A5D23]"
           >
             {routines.map((r) => (
-              <option key={r.id} value={r.id}>Week of {r.weekStart}{r.published ? " (Live)" : ""}{(r.repeatWeeks || 1) > 1 ? ` (${r.repeatWeeks}wk)` : ""}</option>
+              <option key={r.id} value={r.id}>Week of {r.weekStart}{r.published ? " (Live)" : ""}</option>
             ))}
           </select>
           <button onClick={handleCreateNewWeek} className="px-4 py-2.5 bg-white border border-[#4A5D23]/15 text-[#4A5D23]/60 rounded-xl hover:bg-[#4A5D23]/5 text-sm font-semibold transition-colors">
             + New Week
           </button>
-          {/* Repeat weeks */}
-          <div className="flex items-center gap-2 bg-white border border-[#4A5D23]/15 rounded-xl px-3 py-1.5">
-            <span className="text-xs text-[#1A0A1F]/40 font-medium whitespace-nowrap">Repeat</span>
-            <select
-              value={activeRoutine?.repeatWeeks || 1}
-              onChange={async (e) => {
-                if (!activeRoutine) return;
-                const updated = { ...activeRoutine, repeatWeeks: Number(e.target.value) };
-                setActiveRoutine(updated);
-                setSaving(true); await saveRoutine(updated); setSaving(false);
-                showMsg(Number(e.target.value) > 1 ? `Repeats for ${e.target.value} weeks` : "Single week");
-              }}
-              className="text-sm font-bold text-[#4A5D23] bg-transparent focus:outline-none cursor-pointer"
-            >
-              {[1, 2, 3, 4, 5, 6, 8].map((n) => (
-                <option key={n} value={n}>{n} {n === 1 ? "week" : "weeks"}</option>
-              ))}
-            </select>
-          </div>
           <button onClick={handleTogglePublish} className={`ml-auto px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
             activeRoutine?.published
               ? "bg-white text-[#E8730C] border border-[#E8730C]/30 hover:bg-[#E8730C]/5"
@@ -248,7 +373,7 @@ export default function TrainerPage() {
 
         {/* Tab switcher */}
         <div className="flex gap-1 bg-[#4A5D23]/8 p-1 rounded-xl mb-6 w-fit">
-          {(["exercises", "equipment", "activity"] as TrainerTab[]).map((tab) => (
+          {(["exercises", "templates", "equipment", "activity"] as TrainerTab[]).map((tab) => (
             <button key={tab} onClick={() => setTrainerTab(tab)}
               className={`px-5 py-2.5 rounded-full text-sm font-semibold capitalize transition-all font-display hover-pop ${
                 trainerTab === tab ? "bg-[#4A5D23] text-white shadow-md" : "text-[#4A5D23]/40 hover:text-[#4A5D23]/60"
@@ -450,11 +575,161 @@ export default function TrainerPage() {
           );
         })()}
 
+        {/* Templates tab — Jamie's library of reusable workouts */}
+        {trainerTab === "templates" && (() => {
+          // When editing a template, show the exercise list for it (mirrors the Exercises tab)
+          if (editingTemplate) {
+            const tplExercises = editingTemplate.exercises;
+            return (
+              <div>
+                <div className="flex items-center gap-3 mb-5">
+                  <button
+                    onClick={() => { setEditingTemplate(null); setShowForm(false); setEditingExercise(undefined); }}
+                    className="text-xs font-semibold text-[#1A0A1F]/50 hover:text-[#1A0A1F] flex items-center gap-1"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                    </svg>
+                    Back to templates
+                  </button>
+                </div>
+                <h2 className="text-xl font-bold font-display text-[#1A0A1F] mb-1">{editingTemplate.name}</h2>
+                <p className="text-sm text-[#1A0A1F]/40 mb-5">
+                  {tplExercises.length} exercise{tplExercises.length !== 1 ? "s" : ""}
+                </p>
+
+                <div className="space-y-3">
+                  {tplExercises.length === 0 && !showForm && (
+                    <div className="text-center py-12 bg-white rounded-2xl border-2 border-dashed border-black/10">
+                      <p className="text-[#1A0A1F]/30 mb-4 text-sm">This template is empty.</p>
+                      <button
+                        onClick={() => { setEditingExercise(undefined); setShowForm(true); }}
+                        className="bg-[#4A5D23] text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-[#3D4E1C] transition-colors"
+                      >
+                        Add first exercise
+                      </button>
+                    </div>
+                  )}
+
+                  {tplExercises.map((exercise, index) => (
+                    <div key={exercise.id} className="bg-white rounded-2xl border border-black/5 shadow-sm p-5">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start gap-3 flex-1 min-w-0">
+                          <span className="flex-shrink-0 w-8 h-8 rounded-lg bg-[#4A5D23] text-white flex items-center justify-center text-sm font-bold">{index + 1}</span>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-bold text-[#1A0A1F]">{exercise.name}</h3>
+                            <div className="flex gap-3 mt-1.5 text-sm text-[#1A0A1F]/50">
+                              <span className="font-medium">{exercise.sets} sets</span>
+                              <span className="text-[#1A0A1F]/20">|</span>
+                              <span className="font-medium">{exercise.reps} reps</span>
+                              {exercise.targetWeight > 0 && (<><span className="text-[#1A0A1F]/20">|</span><span className="font-medium text-[#E8730C]">{exercise.targetWeight} lbs</span></>)}
+                            </div>
+                            {exercise.notes && <p className="text-sm text-[#1A0A1F]/30 mt-1.5 italic">{exercise.notes}</p>}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <button onClick={() => handleMoveTemplateExercise(exercise.id, "up")} disabled={index === 0}
+                            className="p-2 text-[#1A0A1F]/20 hover:text-[#1A0A1F]/60 hover:bg-[#F7F6F0] rounded-lg disabled:opacity-20 transition-colors">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" /></svg>
+                          </button>
+                          <button onClick={() => handleMoveTemplateExercise(exercise.id, "down")} disabled={index === tplExercises.length - 1}
+                            className="p-2 text-[#1A0A1F]/20 hover:text-[#1A0A1F]/60 hover:bg-[#F7F6F0] rounded-lg disabled:opacity-20 transition-colors">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                          </button>
+                          <button onClick={() => { setEditingExercise(exercise); setShowForm(true); }}
+                            className="p-2 text-[#E8730C]/50 hover:text-[#E8730C] hover:bg-[#4A5D23]/5 rounded-lg transition-colors">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" /></svg>
+                          </button>
+                          <button onClick={() => handleDeleteTemplateExercise(exercise.id)}
+                            className="p-2 text-red-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {tplExercises.length > 0 && !showForm && (
+                    <button onClick={() => { setEditingExercise(undefined); setShowForm(true); }}
+                      className="w-full py-4 border-2 border-dashed border-black/10 rounded-2xl text-[#1A0A1F]/30 hover:text-[#E8730C] hover:border-[#E8730C]/30 hover:bg-[#4A5D23]/5 font-semibold transition-all">
+                      + Add exercise
+                    </button>
+                  )}
+
+                  {showForm && (
+                    <ExerciseForm
+                      exercise={editingExercise}
+                      routineId={editingTemplate.id}
+                      onSave={handleSaveTemplateExercise}
+                      onCancel={() => { setShowForm(false); setEditingExercise(undefined); }}
+                    />
+                  )}
+                </div>
+              </div>
+            );
+          }
+
+          // Template list view
+          const filtered = templates.filter((t) => matchesQuery(t.name, templateSearchQuery));
+          return (
+            <div>
+              <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+                <div>
+                  <p className="text-[#E8730C] text-xs font-bold uppercase tracking-[0.15em]">Library</p>
+                  <h2 className="text-xl font-bold font-display text-[#1A0A1F]">Saved Workouts</h2>
+                </div>
+                <button
+                  onClick={handleCreateNewTemplate}
+                  className="bg-[#4A5D23] text-white px-4 py-2.5 rounded-xl font-bold text-sm hover:bg-[#3D4E1C] transition-colors shadow-lg shadow-[#4A5D23]/25"
+                >
+                  + New template
+                </button>
+              </div>
+
+              {templates.length > 0 && (
+                <div className="mb-5">
+                  <ExerciseSearchBox
+                    value={templateSearchQuery}
+                    onChange={setTemplateSearchQuery}
+                    placeholder="Search templates..."
+                    accentColor="#4A5D23"
+                  />
+                </div>
+              )}
+
+              {templates.length === 0 ? (
+                <div className="text-center py-14 bg-white rounded-2xl border-2 border-dashed border-black/10">
+                  <p className="text-4xl mb-3">📋</p>
+                  <p className="text-[#1A0A1F]/60 font-semibold mb-1">No templates yet</p>
+                  <p className="text-[#1A0A1F]/40 text-sm max-w-xs mx-auto">
+                    Save a day&apos;s exercises as a template, or click &ldquo;+ New template&rdquo; above.
+                  </p>
+                </div>
+              ) : filtered.length === 0 ? (
+                <p className="text-sm text-[#1A0A1F]/40 italic">No templates match &ldquo;{templateSearchQuery}&rdquo;</p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {filtered.map((t) => (
+                    <TemplateCard
+                      key={t.id}
+                      template={t}
+                      onEdit={(tpl) => { setEditingTemplate(tpl); setShowForm(false); setEditingExercise(undefined); }}
+                      onDuplicate={handleDuplicateTemplate}
+                      onRename={handleRenameTemplate}
+                      onDelete={handleDeleteTemplate}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
         {/* Exercises tab */}
         {trainerTab === "exercises" && (
           <>
             {/* Day tabs */}
-            <div className="flex gap-1.5 mb-6 overflow-x-auto scrollbar-hide pb-1">
+            <div className="flex gap-1.5 mb-3 overflow-x-auto scrollbar-hide pb-1">
               {DAYS_OF_WEEK.map((day) => {
                 const count = activeRoutine?.days[day]?.exercises?.length || 0;
                 return (
@@ -468,6 +743,30 @@ export default function TrainerPage() {
                   </button>
                 );
               })}
+            </div>
+
+            {/* Day-level template actions */}
+            <div className="flex gap-2 mb-6">
+              <button
+                onClick={() => setShowTemplatePicker(true)}
+                className="text-xs font-semibold text-[#4A5D23] bg-white border border-[#4A5D23]/20 hover:bg-[#4A5D23]/5 px-3 py-2 rounded-lg transition-colors flex items-center gap-1.5"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                </svg>
+                Apply template
+              </button>
+              {exercises.length > 0 && (
+                <button
+                  onClick={handleSaveDayAsTemplate}
+                  className="text-xs font-semibold text-[#E8730C] bg-white border border-[#E8730C]/20 hover:bg-[#E8730C]/5 px-3 py-2 rounded-lg transition-colors flex items-center gap-1.5"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h6l5 5v11a2 2 0 01-2 2H7a2 2 0 01-2-2V5z M9 13h6 M9 17h4" />
+                  </svg>
+                  Save {selectedDay} as template
+                </button>
+              )}
             </div>
 
             {/* Exercise list */}
@@ -586,6 +885,17 @@ export default function TrainerPage() {
           </>
         )}
       </div>
+
+      {/* Apply-template modal */}
+      {showTemplatePicker && activeRoutine && (
+        <TemplatePicker
+          templates={templates}
+          targetDay={selectedDay}
+          hasExistingExercises={(activeRoutine.days[selectedDay]?.exercises?.length || 0) > 0}
+          onApply={handleApplyTemplate}
+          onClose={() => setShowTemplatePicker(false)}
+        />
+      )}
     </div>
   );
 }
