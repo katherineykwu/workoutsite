@@ -366,14 +366,17 @@ export default function WorkoutPage() {
                   }`}>
                   <span className={`text-[10px] uppercase tracking-wider mb-0.5 font-bold ${isSelected ? "text-white/80" : "text-[#49443D]/25"}`}>{day.slice(0, 3)}</span>
                   <span className={`text-lg font-bold font-display ${isSelected ? "text-white" : "text-[#49443D]/70"}`}>{dayNum}</span>
-                  {/* Exercise count badge — small dot with number, top-right */}
+                  {/* Workout day indicator — small barbell dot under the date */}
                   {count > 0 && (
-                    <span className={`absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center ${
-                      isSelected ? "bg-white text-[#C4706E]" : "bg-[#C4706E] text-white"
-                    }`}>
-                      {count}
+                    <span
+                      className={`mt-1 text-[10px] ${isSelected ? "opacity-90" : "opacity-60"}`}
+                      aria-label={`${count} exercise${count !== 1 ? "s" : ""}`}
+                      title={`${count} exercise${count !== 1 ? "s" : ""}`}
+                    >
+                      🏋️
                     </span>
                   )}
+                  {/* Today indicator — only when empty rest day */}
                   {isToday && !isSelected && count === 0 && (
                     <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#C4706E] rounded-full border-2 border-white" />
                   )}
