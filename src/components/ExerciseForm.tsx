@@ -67,7 +67,7 @@ export default function ExerciseForm({ exercise, routineId, onSave, onCancel }: 
       <div className="grid grid-cols-3 gap-3">
         <div>
           <label className="block text-sm font-semibold text-[#1A0A1F]/50 mb-1.5">Sets</label>
-          <input type="number" value={sets} onChange={(e) => setSets(Number(e.target.value))} min={1} className={inputClass} />
+          <input type="number" inputMode="numeric" value={sets} onChange={(e) => setSets(Number(e.target.value))} min={1} className={inputClass} />
         </div>
         <div>
           <label className="block text-sm font-semibold text-[#1A0A1F]/50 mb-1.5">Reps</label>
@@ -75,7 +75,7 @@ export default function ExerciseForm({ exercise, routineId, onSave, onCancel }: 
         </div>
         <div>
           <label className="block text-sm font-semibold text-[#1A0A1F]/50 mb-1.5">Weight (lbs)</label>
-          <input type="number" value={targetWeight || ""} onChange={(e) => setTargetWeight(Number(e.target.value))} min={0} placeholder="0" className={inputClass} />
+          <input type="number" inputMode="decimal" value={targetWeight || ""} onChange={(e) => setTargetWeight(Number(e.target.value))} min={0} placeholder="0" className={inputClass} />
         </div>
       </div>
 

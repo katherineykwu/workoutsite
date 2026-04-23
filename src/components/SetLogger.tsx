@@ -20,6 +20,7 @@ export default function SetLogger({
         <div className="relative flex-1">
           <input
             type="number"
+            inputMode="decimal"
             value={weight || ""}
             onChange={(e) => onChange(Number(e.target.value), reps)}
             placeholder={placeholderWeight ? String(placeholderWeight) : "0"}
@@ -31,6 +32,7 @@ export default function SetLogger({
         <div className="relative flex-1">
           <input
             type="number"
+            inputMode="numeric"
             value={reps || ""}
             onChange={(e) => onChange(weight, Number(e.target.value))}
             placeholder={placeholderReps ? String(placeholderReps) : "0"}

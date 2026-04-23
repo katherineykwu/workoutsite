@@ -5,9 +5,71 @@
   --font-display: var(--font-fredoka);
 }
 
+html {
+  /* Prevent iOS from auto-zooming when input is focused */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   font-family: var(--font-sans), -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
+  /* Prevent rubber-band scrolling from exposing the background */
+  overscroll-behavior-y: contain;
+  /* Respect iPhone safe areas (notch, home indicator) */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* ---- Mobile / iOS polish ---- */
+
+/* Remove the 300ms tap delay and the gray flash on iOS */
+button, a, [role="button"], input, select, textarea {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Don't let iOS select text inside buttons when long-pressing */
+button, [role="button"] {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* iOS zooms in when you focus an input with font-size < 16px.
+   Force all number/text/url/textarea inputs to at least 16px. */
+input[type="text"],
+input[type="number"],
+input[type="url"],
+input[type="email"],
+input[type="tel"],
+input[type="password"],
+input[type="search"],
+textarea,
+select {
+  font-size: max(16px, 1em);
+}
+
+/* Remove iOS's ugly default input styling */
+input, textarea, select {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* iOS number inputs: hide the spinner arrows */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Sticky bottom bars should sit above the iPhone home indicator */
+.safe-bottom {
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom));
 }
 
 /* Display font for headings */

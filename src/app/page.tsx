@@ -435,7 +435,7 @@ export default function WorkoutPage() {
 
       {/* Sticky bottom bar when logging */}
       {loggingMode && exercises.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-black/10 px-5 py-4 z-20">
+        <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-black/10 px-5 pt-4 safe-bottom z-20">
           <div className="max-w-2xl mx-auto flex items-center justify-between">
             <div>
               <span className="text-sm text-[#49443D]/40 font-medium">
