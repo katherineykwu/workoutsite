@@ -7,6 +7,8 @@ import ExerciseForm from "@/components/ExerciseForm";
 import EquipmentDisplay from "@/components/EquipmentDisplay";
 import ProgressChart from "@/components/ProgressChart";
 import VideoPlayer from "@/components/VideoPlayer";
+import WorkoutHistoryItem from "@/components/WorkoutHistoryItem";
+import ExerciseSearchBox from "@/components/ExerciseSearchBox";
 import {
   getAllRoutines, saveRoutine, getRoutine, createBlankRoutine, getCurrentWeekMonday,
 } from "@/lib/routines";
@@ -14,6 +16,11 @@ import { getAllLogs, getPersonalBests } from "@/lib/workoutLogs";
 import type { Routine, Exercise, DayOfWeek, WorkoutLog, PersonalBest } from "@/lib/types";
 import { DAYS_OF_WEEK } from "@/lib/types";
 import { groupExercises } from "@/lib/groupExercises";
+import { matchesQuery } from "@/lib/filterBySearch";
+
+const PB_DEFAULT_LIMIT = 6;
+const PILL_DEFAULT_LIMIT = 8;
+const HISTORY_PAGE_SIZE = 10;
 
 type TrainerTab = "exercises" | "equipment" | "activity";
 
@@ -40,6 +47,12 @@ export default function TrainerPage() {
   const [clientEquipment, setClientEquipment] = useState<string[]>([]);
   const [clientGymPhotos, setClientGymPhotos] = useState<string[]>([]);
   const [chartExercise, setChartExercise] = useState<string>("");
+
+  // Activity tab — search + decrowding state
+  const [activityQuery, setActivityQuery] = useState("");
+  const [activityPbsExpanded, setActivityPbsExpanded] = useState(false);
+  const [activityPillsExpanded, setActivityPillsExpanded] = useState(false);
+  const [activityHistoryLimit, setActivityHistoryLimit] = useState(HISTORY_PAGE_SIZE);
 
   useEffect(() => {
     if (sessionStorage.getItem("trainer-auth") === "true") setAuthenticated(true);
@@ -285,107 +298,157 @@ export default function TrainerPage() {
         )}
 
         {/* Activity tab — client's logged workouts */}
-        {trainerTab === "activity" && (
-          <div className="space-y-6">
-            {/* Personal Bests summary */}
-            {Object.keys(clientPBs).length > 0 && (
-              <div>
-                <p className="text-[#E8730C] text-xs font-bold uppercase tracking-[0.15em] mb-2">Personal Records</p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                  {Object.values(clientPBs).sort((a, b) => b.weight - a.weight).map((pb) => (
-                    <div key={pb.exerciseName} className="bg-white rounded-xl border border-black/5 shadow-sm p-3 border-l-4 border-l-[#4A5D23]">
-                      <p className="text-xs font-bold text-[#1A0A1F] truncate">{pb.displayName}</p>
-                      <p className="text-lg font-extrabold text-[#E8730C]">{pb.weight} <span className="text-xs text-[#1A0A1F]/30">lbs</span></p>
-                      <p className="text-[10px] text-[#1A0A1F]/30">{pb.reps} reps · {pb.date}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+        {trainerTab === "activity" && (() => {
+          const allPbList = Object.values(clientPBs).sort((a, b) => b.weight - a.weight);
+          const allExerciseNames = Array.from(new Set(workoutLogs.flatMap((l) => l.exercises.map((e) => e.exerciseName))));
 
-            {/* Progress chart */}
-            {workoutLogs.length > 0 && (() => {
-              const exerciseNames = Array.from(new Set(workoutLogs.flatMap((l) => l.exercises.map((e) => e.exerciseName))));
-              return exerciseNames.length > 0 ? (
-                <div>
-                  <p className="text-[#E8730C] text-xs font-bold uppercase tracking-[0.15em] mb-2">Progress</p>
-                  <p className="text-lg font-extrabold text-[#1A0A1F] mb-4">Katherine&apos;s Strength Over Time</p>
-                  <div className="flex gap-1.5 overflow-x-auto scrollbar-hide mb-4 pb-1">
-                    {exerciseNames.map((name) => (
-                      <button key={name} onClick={() => setChartExercise(name)}
-                        className={`px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex-shrink-0 ${
-                          chartExercise === name
-                            ? "bg-[#4A5D23] text-white shadow-md"
-                            : "bg-white border border-black/5 text-[#1A0A1F]/50 hover:bg-[#F7F6F0]"
-                        }`}>
-                        {name}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="bg-white rounded-2xl border border-black/5 p-4 shadow-sm">
-                    <ProgressChart logs={workoutLogs} exerciseName={chartExercise || exerciseNames[0]} />
-                  </div>
-                </div>
-              ) : null;
-            })()}
+          // Apply search filter to all three sections
+          const filteredPbs = allPbList.filter((pb) => matchesQuery(pb.displayName, activityQuery));
+          const filteredPills = allExerciseNames.filter((name) => matchesQuery(name, activityQuery));
+          const filteredLogs = activityQuery
+            ? workoutLogs.filter((log) => log.exercises.some((ex) => matchesQuery(ex.exerciseName, activityQuery)))
+            : workoutLogs;
 
-            {/* Workout logs */}
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-[#E8730C] text-xs font-bold uppercase tracking-[0.15em]">Workout History</p>
-                <button onClick={loadClientActivity} className="text-xs text-[#1A0A1F]/30 hover:text-[#1A0A1F]/60 font-medium transition-colors">
+          // Pick first matching exercise when search narrows pills
+          const effectiveChart = activityQuery && filteredPills.length > 0 && !filteredPills.includes(chartExercise)
+            ? filteredPills[0]
+            : (chartExercise || allExerciseNames[0] || "");
+
+          // Apply decrowding caps when no active search
+          const visiblePbs = activityQuery ? filteredPbs : (activityPbsExpanded ? allPbList : allPbList.slice(0, PB_DEFAULT_LIMIT));
+          const visiblePills = activityQuery ? filteredPills : (activityPillsExpanded ? allExerciseNames : allExerciseNames.slice(0, PILL_DEFAULT_LIMIT));
+          const hiddenPillCount = (activityQuery ? filteredPills.length : allExerciseNames.length) - visiblePills.length;
+          const visibleLogs = activityQuery ? filteredLogs : filteredLogs.slice(0, activityHistoryLimit);
+
+          return (
+            <div className="space-y-6">
+              {/* Search + Refresh */}
+              <div className="flex items-start gap-3">
+                <div className="flex-1">
+                  <ExerciseSearchBox value={activityQuery} onChange={setActivityQuery} accentColor="#E8730C" />
+                </div>
+                <button
+                  onClick={loadClientActivity}
+                  className="mt-1 text-xs text-[#1A0A1F]/40 hover:text-[#1A0A1F] font-medium transition-colors px-3 py-2.5 bg-white border border-black/5 rounded-xl shadow-sm"
+                  aria-label="Refresh"
+                >
                   Refresh
                 </button>
               </div>
 
-              {workoutLogs.length === 0 ? (
-                <div className="text-center py-12 bg-white rounded-2xl border border-black/5">
-                  <span className="text-3xl mb-3 block">🦦</span>
-                  <p className="text-[#1A0A1F]/30 text-sm">Katherine hasn&apos;t logged any workouts yet</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {workoutLogs.map((log) => {
-                    const d = new Date(log.date + "T00:00:00");
-                    const dateStr = d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
-                    return (
-                      <div key={log.id} className="bg-white rounded-2xl border border-black/5 shadow-sm p-5">
-                        <div className="flex items-center justify-between mb-3">
-                          <div>
-                            <p className="font-bold text-[#1A0A1F] text-sm">{dateStr}</p>
-                            <p className="text-[10px] text-[#1A0A1F]/30">{log.dayOfWeek} · {log.exercises.length} exercise{log.exercises.length !== 1 ? "s" : ""}</p>
+              {/* Personal Bests */}
+              {allPbList.length > 0 && (
+                <div>
+                  <p className="text-[#E8730C] text-xs font-bold uppercase tracking-[0.15em] mb-2">Personal Records</p>
+                  {visiblePbs.length > 0 ? (
+                    <>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                        {visiblePbs.map((pb) => (
+                          <div key={pb.exerciseName} className="bg-white rounded-xl border border-black/5 shadow-sm p-3 border-l-4 border-l-[#4A5D23]">
+                            <p className="text-xs font-bold text-[#1A0A1F] truncate">{pb.displayName}</p>
+                            <p className="text-lg font-bold font-display text-[#E8730C]">{pb.weight} <span className="text-xs text-[#1A0A1F]/30">lbs</span></p>
+                            <p className="text-[10px] text-[#1A0A1F]/30">{pb.reps} reps · {pb.date}</p>
                           </div>
-                        </div>
-                        <div className="space-y-3">
-                          {log.exercises.map((ex) => (
-                            <div key={ex.exerciseId} className="border-t border-black/5 pt-3 first:border-0 first:pt-0">
-                              <p className="text-sm font-semibold text-[#1A0A1F]">{ex.exerciseName}</p>
-                              <div className="flex flex-wrap gap-1.5 mt-1.5">
-                                {ex.sets.map((set) => (
-                                  <span key={set.setNumber} className="text-xs bg-[#F7F6F0] text-[#1A0A1F]/60 px-2.5 py-1 rounded-lg font-medium">
-                                    {set.weight} lbs × {set.reps}
-                                  </span>
-                                ))}
-                              </div>
-                              {ex.clientNote && (
-                                <div className="mt-2 flex items-start gap-2 bg-[#4A5D23]/5 rounded-lg px-3 py-2">
-                                  <svg className="w-3.5 h-3.5 text-[#E8730C] mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-                                  </svg>
-                                  <p className="text-xs text-[#E8730C] font-medium leading-relaxed">{ex.clientNote}</p>
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
+                        ))}
                       </div>
-                    );
-                  })}
+                      {!activityQuery && allPbList.length > PB_DEFAULT_LIMIT && (
+                        <button
+                          onClick={() => setActivityPbsExpanded(!activityPbsExpanded)}
+                          className="mt-3 text-sm text-[#E8730C] font-semibold hover:underline"
+                        >
+                          {activityPbsExpanded ? "Show less" : `Show all (${allPbList.length})`}
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-sm text-[#1A0A1F]/40 italic">No PRs match &ldquo;{activityQuery}&rdquo;</p>
+                  )}
                 </div>
               )}
+
+              {/* Progress chart */}
+              {allExerciseNames.length > 0 && (
+                <div>
+                  <p className="text-[#E8730C] text-xs font-bold uppercase tracking-[0.15em] mb-2">Progress</p>
+                  <p className="text-lg font-bold font-display text-[#1A0A1F] mb-4">Katherine&apos;s Strength Over Time</p>
+                  {visiblePills.length > 0 ? (
+                    <>
+                      <div className="flex gap-1.5 flex-wrap mb-4">
+                        {visiblePills.map((name) => (
+                          <button key={name} onClick={() => setChartExercise(name)}
+                            className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
+                              effectiveChart === name
+                                ? "bg-[#4A5D23] text-white shadow-md"
+                                : "bg-white border border-black/5 text-[#1A0A1F]/50 hover:bg-[#F7F6F0]"
+                            }`}>
+                            {name}
+                          </button>
+                        ))}
+                        {!activityQuery && hiddenPillCount > 0 && (
+                          <button
+                            onClick={() => setActivityPillsExpanded(true)}
+                            className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#F7F6F0] text-[#1A0A1F]/60 hover:bg-[#EDE6DA] border border-dashed border-[#1A0A1F]/15"
+                          >
+                            +{hiddenPillCount} more
+                          </button>
+                        )}
+                        {!activityQuery && activityPillsExpanded && allExerciseNames.length > PILL_DEFAULT_LIMIT && (
+                          <button
+                            onClick={() => setActivityPillsExpanded(false)}
+                            className="px-3.5 py-2 rounded-xl text-xs font-semibold text-[#1A0A1F]/40 hover:text-[#1A0A1F]"
+                          >
+                            Show less
+                          </button>
+                        )}
+                      </div>
+                      <div className="bg-white rounded-2xl border border-black/5 p-4 shadow-sm">
+                        <ProgressChart logs={workoutLogs} exerciseName={effectiveChart} />
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-sm text-[#1A0A1F]/40 italic">No exercises match &ldquo;{activityQuery}&rdquo;</p>
+                  )}
+                </div>
+              )}
+
+              {/* Workout logs */}
+              <div>
+                <p className="text-[#E8730C] text-xs font-bold uppercase tracking-[0.15em] mb-3">Workout History</p>
+
+                {workoutLogs.length === 0 ? (
+                  <div className="text-center py-12 bg-white rounded-2xl border border-black/5">
+                    <span className="text-3xl mb-3 block">🦦</span>
+                    <p className="text-[#1A0A1F]/30 text-sm">Katherine hasn&apos;t logged any workouts yet</p>
+                  </div>
+                ) : visibleLogs.length > 0 ? (
+                  <>
+                    <div className="space-y-3">
+                      {visibleLogs.map((log) => (
+                        <WorkoutHistoryItem
+                          key={log.id}
+                          log={log}
+                          theme="trainer"
+                          highlightExercise={activityQuery || undefined}
+                          defaultExpanded={!!activityQuery}
+                        />
+                      ))}
+                    </div>
+                    {!activityQuery && filteredLogs.length > activityHistoryLimit && (
+                      <button
+                        onClick={() => setActivityHistoryLimit(activityHistoryLimit + HISTORY_PAGE_SIZE)}
+                        className="w-full mt-3 py-3 rounded-2xl bg-white border border-black/5 text-[#E8730C] font-semibold text-sm hover:bg-[#F7F6F0] transition-colors shadow-sm"
+                      >
+                        Load more
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-sm text-[#1A0A1F]/40 italic">No workouts match &ldquo;{activityQuery}&rdquo;</p>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Exercises tab */}
         {trainerTab === "exercises" && (
