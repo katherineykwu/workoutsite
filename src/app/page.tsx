@@ -95,7 +95,24 @@ export default function WorkoutPage() {
         setRoutine(r);
         // Keep all published routines for week navigation
         setAllRoutines(allR.filter((rt: Routine) => rt.published));
-        if (r) setIsCurrentWeek(r.weekStart === getCurrentWeekMonday());
+        if (r) {
+          const currentMonday = getCurrentWeekMonday();
+          const publishedRoutines = allR.filter((rt: Routine) => rt.published);
+          const exact = publishedRoutines.some((rt: Routine) => rt.weekStart === currentMonday);
+          if (exact) {
+            setIsCurrentWeek(r.weekStart === currentMonday);
+          } else {
+            // No routine for this week — treat the closest one as "current"
+            const target = new Date(currentMonday + "T00:00:00").getTime();
+            let closest = publishedRoutines[0];
+            let closestDiff = closest ? Math.abs(new Date(closest.weekStart + "T00:00:00").getTime() - target) : Infinity;
+            for (const rt of publishedRoutines) {
+              const diff = Math.abs(new Date(rt.weekStart + "T00:00:00").getTime() - target);
+              if (diff < closestDiff) { closest = rt; closestDiff = diff; }
+            }
+            setIsCurrentWeek(closest?.id === r.id);
+          }
+        }
         setPersonalBests(pbs);
         if (eqRes.ok) {
           const eqData = await eqRes.json();
@@ -156,7 +173,8 @@ export default function WorkoutPage() {
     if (newIdx < 0 || newIdx >= allRoutines.length) return;
     const newRoutine = allRoutines[newIdx];
     setRoutine(newRoutine);
-    setIsCurrentWeek(newRoutine.weekStart === getCurrentWeekMonday());
+    const closest = getClosestRoutine(allRoutines);
+    setIsCurrentWeek(closest?.id === newRoutine.id);
     setSelectedDay(getTodayName());
     setLoggingMode(false);
     setLogData({});
@@ -167,12 +185,36 @@ export default function WorkoutPage() {
   const canGoNext = routine && allRoutines.findIndex((r) => r.id === routine.id) > 0;
 
   // Jump to the current week's routine (or the most recent one if none exists for this week)
+  function getClosestRoutine(routines: Routine[]): Routine | null {
+    if (routines.length === 0) return null;
+    const currentMonday = getCurrentWeekMonday();
+    const exact = routines.find((r) => r.weekStart === currentMonday);
+    if (exact) return exact;
+    // No exact match — find the closest routine by week start date
+    const target = new Date(currentMonday + "T00:00:00").getTime();
+    let closest = routines[0];
+    let closestDiff = Math.abs(new Date(closest.weekStart + "T00:00:00").getTime() - target);
+    for (const r of routines) {
+      const diff = Math.abs(new Date(r.weekStart + "T00:00:00").getTime() - target);
+      if (diff < closestDiff) { closest = r; closestDiff = diff; }
+    }
+    return closest;
+  }
+
+  function isOnClosestRoutine(): boolean {
+    if (!routine || allRoutines.length === 0) return true;
+    const currentMonday = getCurrentWeekMonday();
+    if (routine.weekStart === currentMonday) return true;
+    const closest = getClosestRoutine(allRoutines);
+    return closest?.id === routine.id;
+  }
+
   function jumpToCurrent() {
     if (allRoutines.length === 0) return;
-    const currentMonday = getCurrentWeekMonday();
-    const target = allRoutines.find((r) => r.weekStart === currentMonday) || allRoutines[0];
+    const target = getClosestRoutine(allRoutines);
+    if (!target) return;
     setRoutine(target);
-    setIsCurrentWeek(target.weekStart === currentMonday);
+    setIsCurrentWeek(true);
     setSelectedDay(getTodayName());
     setLoggingMode(false);
     setLogData({});
@@ -314,7 +356,7 @@ export default function WorkoutPage() {
                   (repeats {routine.repeatWeeks} weeks)
                 </span>
               )}
-              {!isCurrentWeek && !(routine.repeatWeeks && routine.repeatWeeks > 1) && (
+              {!isCurrentWeek && !isOnClosestRoutine() && !(routine.repeatWeeks && routine.repeatWeeks > 1) && (
                 <button
                   onClick={jumpToCurrent}
                   className="text-[#C4706E] ml-1.5 underline underline-offset-2 decoration-dotted hover:decoration-solid transition-all"
