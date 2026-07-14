@@ -96,10 +96,16 @@ export default function WorkoutPage() {
           getPersonalBests(),
           fetch("/api/my-equipment", { cache: "no-store" }),
         ]);
-        setRoutine(r);
         // Keep all published routines for week navigation
         setAllRoutines(allR.filter((rt: Routine) => rt.published));
-        if (r) setIsCurrentWeek(coversCurrentWeek(r));
+        // Always land on the current week — if no routine covers it, show it
+        // as rest days (past routines stay reachable via the week arrows)
+        if (r && !coversCurrentWeek(r)) {
+          setRoutine(createBlankRoutine(getCurrentWeekMonday()));
+        } else {
+          setRoutine(r);
+        }
+        setIsCurrentWeek(true);
         setPersonalBests(pbs);
         if (eqRes.ok) {
           const eqData = await eqRes.json();
