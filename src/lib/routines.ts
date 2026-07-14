@@ -67,7 +67,11 @@ export function getCurrentWeekMonday(): string {
   const diff = day === 0 ? -6 : 1 - day;
   const monday = new Date(now);
   monday.setDate(now.getDate() + diff);
-  return monday.toISOString().split("T")[0];
+  // Format in local time — toISOString() would shift to UTC and can be off by a day
+  const y = monday.getFullYear();
+  const m = String(monday.getMonth() + 1).padStart(2, "0");
+  const d = String(monday.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
 }
 
 // Create a new blank routine for a given week

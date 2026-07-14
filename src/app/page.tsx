@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { getPublishedRoutine, getAllRoutines, getCurrentWeekMonday } from "@/lib/routines";
+import { getPublishedRoutine, getAllRoutines, getCurrentWeekMonday, createBlankRoutine } from "@/lib/routines";
 import { getAllLogs, saveWorkoutLog, getPersonalBests } from "@/lib/workoutLogs";
 import type { Routine, DayOfWeek, SetLog, ExerciseLog, WorkoutLog, PersonalBest } from "@/lib/types";
 import { DAYS_OF_WEEK } from "@/lib/types";
@@ -28,7 +28,11 @@ function formatWeekRange(weekStart: string): string {
 }
 
 function todayISO(): string {
-  return new Date().toISOString().split("T")[0];
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
 }
 
 export default function WorkoutPage() {
@@ -95,24 +99,7 @@ export default function WorkoutPage() {
         setRoutine(r);
         // Keep all published routines for week navigation
         setAllRoutines(allR.filter((rt: Routine) => rt.published));
-        if (r) {
-          const currentMonday = getCurrentWeekMonday();
-          const publishedRoutines = allR.filter((rt: Routine) => rt.published);
-          const exact = publishedRoutines.some((rt: Routine) => rt.weekStart === currentMonday);
-          if (exact) {
-            setIsCurrentWeek(r.weekStart === currentMonday);
-          } else {
-            // No routine for this week — treat the closest one as "current"
-            const target = new Date(currentMonday + "T00:00:00").getTime();
-            let closest = publishedRoutines[0];
-            let closestDiff = closest ? Math.abs(new Date(closest.weekStart + "T00:00:00").getTime() - target) : Infinity;
-            for (const rt of publishedRoutines) {
-              const diff = Math.abs(new Date(rt.weekStart + "T00:00:00").getTime() - target);
-              if (diff < closestDiff) { closest = rt; closestDiff = diff; }
-            }
-            setIsCurrentWeek(closest?.id === r.id);
-          }
-        }
+        if (r) setIsCurrentWeek(coversCurrentWeek(r));
         setPersonalBests(pbs);
         if (eqRes.ok) {
           const eqData = await eqRes.json();
@@ -173,8 +160,7 @@ export default function WorkoutPage() {
     if (newIdx < 0 || newIdx >= allRoutines.length) return;
     const newRoutine = allRoutines[newIdx];
     setRoutine(newRoutine);
-    const closest = getClosestRoutine(allRoutines);
-    setIsCurrentWeek(closest?.id === newRoutine.id);
+    setIsCurrentWeek(coversCurrentWeek(newRoutine));
     setSelectedDay(getTodayName());
     setLoggingMode(false);
     setLogData({});
@@ -185,34 +171,27 @@ export default function WorkoutPage() {
   const canGoNext = routine && allRoutines.findIndex((r) => r.id === routine.id) > 0;
 
   // Jump to the current week's routine (or the most recent one if none exists for this week)
-  function getClosestRoutine(routines: Routine[]): Routine | null {
-    if (routines.length === 0) return null;
+  // Does this routine's week (including repeat weeks) cover the current week?
+  function coversCurrentWeek(r: Routine): boolean {
     const currentMonday = getCurrentWeekMonday();
-    const exact = routines.find((r) => r.weekStart === currentMonday);
-    if (exact) return exact;
-    // No exact match — find the closest routine by week start date
-    const target = new Date(currentMonday + "T00:00:00").getTime();
-    let closest = routines[0];
-    let closestDiff = Math.abs(new Date(closest.weekStart + "T00:00:00").getTime() - target);
-    for (const r of routines) {
-      const diff = Math.abs(new Date(r.weekStart + "T00:00:00").getTime() - target);
-      if (diff < closestDiff) { closest = r; closestDiff = diff; }
-    }
-    return closest;
-  }
-
-  function isOnClosestRoutine(): boolean {
-    if (!routine || allRoutines.length === 0) return true;
-    const currentMonday = getCurrentWeekMonday();
-    if (routine.weekStart === currentMonday) return true;
-    const closest = getClosestRoutine(allRoutines);
-    return closest?.id === routine.id;
+    if (r.weekStart === currentMonday) return true;
+    const weeks = r.repeatWeeks || 1;
+    if (weeks <= 1) return false;
+    const start = new Date(r.weekStart + "T00:00:00");
+    const end = new Date(start);
+    end.setDate(start.getDate() + weeks * 7);
+    const current = new Date(currentMonday + "T00:00:00");
+    return current >= start && current < end;
   }
 
   function jumpToCurrent() {
-    if (allRoutines.length === 0) return;
-    const target = getClosestRoutine(allRoutines);
-    if (!target) return;
+    const currentMonday = getCurrentWeekMonday();
+    // Use the routine published for this week (or one that repeats into it);
+    // otherwise show the actual current week as a blank week of rest days
+    const target =
+      allRoutines.find((r) => r.weekStart === currentMonday) ||
+      allRoutines.find((r) => coversCurrentWeek(r)) ||
+      createBlankRoutine(currentMonday);
     setRoutine(target);
     setIsCurrentWeek(true);
     setSelectedDay(getTodayName());
@@ -356,7 +335,7 @@ export default function WorkoutPage() {
                   (repeats {routine.repeatWeeks} weeks)
                 </span>
               )}
-              {!isCurrentWeek && !isOnClosestRoutine() && !(routine.repeatWeeks && routine.repeatWeeks > 1) && (
+              {!isCurrentWeek && (
                 <button
                   onClick={jumpToCurrent}
                   className="text-[#C4706E] ml-1.5 underline underline-offset-2 decoration-dotted hover:decoration-solid transition-all"
@@ -395,7 +374,7 @@ export default function WorkoutPage() {
             {DAYS_OF_WEEK.map((day, dayIdx) => {
               const count = routine.days[day]?.exercises?.length || 0;
               const isSelected = selectedDay === day;
-              const isToday = day === today;
+              const isToday = day === today && isCurrentWeek;
               // Compute the calendar day number for this day of the week
               const weekStartDate = new Date(routine.weekStart + "T00:00:00");
               const thisDate = new Date(weekStartDate);
@@ -436,7 +415,7 @@ export default function WorkoutPage() {
         {/* Day heading + Start Workout button */}
         <div className="flex items-center gap-3 mb-5">
           <h2 className="text-xl font-bold text-[#49443D] font-display">{selectedDay}</h2>
-          {selectedDay === today && (
+          {selectedDay === today && isCurrentWeek && (
             <span className="text-[10px] font-bold uppercase tracking-widest bg-[#C4706E] text-white px-2.5 py-1 rounded-full">Today</span>
           )}
           {exercises.length > 0 && !loggingMode && (
