@@ -1,0 +1,11 @@
+/* design-sync stylesheet entry — compiles the app's Tailwind CSS for the
+   claude.ai/design bundle. The app loads Nunito/Fraunces via next/font, which
+   doesn't exist outside Next.js, so we pull them from Google Fonts here and
+   define the same CSS variables next/font would set. */
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..900&family=Nunito:wght@400..800&display=swap");
+@import "../src/app/globals.css";
+
+:root {
+  --font-nunito: "Nunito";
+  --font-fraunces: "Fraunces";
+}

@@ -1,0 +1,40 @@
+{
+  "projectId": "e200fcd8-98c1-4080-8935-48bae9d67443",
+  "shape": "package",
+  "pkg": "workout-app",
+  "globalName": "WorkoutUI",
+  "tsconfig": "tsconfig.json",
+  "entry": ".design-sync/ds-entry.ts",
+  "cssEntry": ".design-sync/.cache/ds-styles.css",
+  "buildCmd": "node .ds-sync/node_modules/@tailwindcss/cli/dist/index.mjs -i .design-sync/tailwind-entry.css -o .design-sync/.cache/ds-styles.css",
+  "readmeHeader": ".design-sync/conventions.md",
+  "overrides": {
+    "WorkoutToast": { "cardMode": "single", "viewport": "480x560" },
+    "TemplatePicker": { "cardMode": "single", "viewport": "560x620" },
+    "MyEquipmentModal": { "cardMode": "single", "viewport": "560x720" },
+    "PasswordGate": { "cardMode": "single", "viewport": "480x640" },
+    "ProgressChart": { "cardMode": "column" },
+    "EquipmentSelector": { "cardMode": "column" },
+    "EquipmentDisplay": { "cardMode": "column" },
+    "ExerciseForm": { "cardMode": "column" },
+    "SupersetCard": { "cardMode": "column" }
+  },
+  "componentSrcMap": {
+    "EquipmentDisplay": "src/components/EquipmentDisplay.tsx",
+    "EquipmentSelector": "src/components/EquipmentSelector.tsx",
+    "ExerciseCard": "src/components/ExerciseCard.tsx",
+    "ExerciseForm": "src/components/ExerciseForm.tsx",
+    "ExerciseSearchBox": "src/components/ExerciseSearchBox.tsx",
+    "MyEquipmentModal": "src/components/MyEquipmentModal.tsx",
+    "PasswordGate": "src/components/PasswordGate.tsx",
+    "PersonalBestCard": "src/components/PersonalBestCard.tsx",
+    "ProgressChart": "src/components/ProgressChart.tsx",
+    "SetLogger": "src/components/SetLogger.tsx",
+    "SupersetCard": "src/components/SupersetCard.tsx",
+    "TemplateCard": "src/components/TemplateCard.tsx",
+    "TemplatePicker": "src/components/TemplatePicker.tsx",
+    "VideoPlayer": "src/components/VideoPlayer.tsx",
+    "WorkoutHistoryItem": "src/components/WorkoutHistoryItem.tsx",
+    "WorkoutToast": "src/components/WorkoutToast.tsx"
+  }
+}
