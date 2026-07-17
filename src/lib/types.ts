@@ -1,10 +1,16 @@
 // Shared types used across the app
 
+// What the `reps` value counts — most exercises are rep-based, but some are
+// measured in distance or time (e.g. Farmer Carry in yards)
+export const UNIT_OPTIONS = ["reps", "seconds", "yards", "meters", "steps"] as const;
+export type ExerciseUnit = (typeof UNIT_OPTIONS)[number];
+
 export interface Exercise {
   id: string;
   name: string;
   sets: number;
   reps: string; // e.g. "8-10" or "12"
+  unit?: ExerciseUnit; // what `reps` counts; absent means "reps"
   restSeconds: number;
   targetWeight: number; // suggested weight in lbs (0 = not specified)
   notes: string;
@@ -12,6 +18,10 @@ export interface Exercise {
   videoUrl: string;
   supersetGroup?: string;  // e.g. "A", "B" — exercises sharing this value are grouped
   supersetLabel?: string;  // section heading, e.g. "Pelvic Floor and Core Rehab"
+  // Rest after completing one full round of the superset. Group-level
+  // semantically — normalizeExercises() keeps it (and `sets` = rounds)
+  // identical across all members of a group.
+  supersetRestSeconds?: number;
 }
 
 export interface DayRoutine {
@@ -93,6 +103,7 @@ export interface SetLog {
 export interface ExerciseLog {
   exerciseId: string;
   exerciseName: string; // saved at log time so history stays accurate even if trainer renames
+  unit?: ExerciseUnit;  // saved at log time so history stays accurate even if trainer changes it
   sets: SetLog[];
   clientNote: string;   // your notes for your trainer (e.g. "felt easy", "shoulder pain")
 }

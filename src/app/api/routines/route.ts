@@ -1,9 +1,22 @@
 // API route: GET and POST /api/routines
 import { NextRequest, NextResponse } from "next/server";
 import { getData, setData } from "@/lib/store";
+import { normalizeExercises } from "@/lib/groupExercises";
 import type { Routine } from "@/lib/types";
 
 const STORE_KEY = "routines";
+
+// Enforce the superset/unit invariants on every routine that passes through
+// the API — legacy data self-heals on read, and nothing unnormalized persists.
+function normalizeRoutine(routine: Routine): Routine {
+  const days = Object.fromEntries(
+    Object.entries(routine.days || {}).map(([day, dayRoutine]) => [
+      day,
+      { ...dayRoutine, exercises: normalizeExercises(dayRoutine.exercises || []) },
+    ])
+  );
+  return { ...routine, days };
+}
 export const dynamic = "force-dynamic";
 
 // Headers to prevent any caching (browser, CDN, Netlify)
@@ -29,7 +42,7 @@ export async function GET(request: NextRequest) {
   const publishedOnly = searchParams.get("published") === "true";
   const id = searchParams.get("id");
 
-  let routines = await readRoutines();
+  let routines = (await readRoutines()).map(normalizeRoutine);
   routines.sort((a, b) => b.weekStart.localeCompare(a.weekStart));
 
   if (publishedOnly) {
@@ -46,7 +59,7 @@ export async function GET(request: NextRequest) {
 
 // POST /api/routines
 export async function POST(request: NextRequest) {
-  const routine: Routine = await request.json();
+  const routine: Routine = normalizeRoutine(await request.json());
   const routines = await readRoutines();
 
   const index = routines.findIndex((r) => r.id === routine.id);

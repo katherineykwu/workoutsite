@@ -14,6 +14,15 @@
 
 - `[FONT_REMOTE]` "Nunito", "Fraunces" — deliberate (Google Fonts at runtime).
 - `[RENDER_SKIPPED]` — expected until playwright is installed on this machine.
+- `[TOKENS_MISSING]` for `--tw-*` vars — resolved 2026-07-16: Tailwind's internal
+  utility custom properties (`--tw-space-y-reverse`, `--tw-shadow-color`, ring/outline
+  vars under `:focus`) are NOT theme tokens and are now excluded at the source in
+  `.ds-sync/package-validate.mjs` (token-coverage block filters `--tw-` prefixed vars).
+  The remote claude.ai/design scope filter may still flag them as unregistered — they
+  should be ignored/whitelisted there too; do not register them as design tokens.
+- The page-level unit patch in the remote template `templates/client-week/ClientWeek.dc.html`
+  (yards-instead-of-reps for Farmer Carry) is superseded by the real `unit` prop on
+  `SetLogger`/`ExerciseCard` (2026-07-16) — remove the patch on the next sync.
 
 ## Re-sync risks
 

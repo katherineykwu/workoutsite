@@ -2,7 +2,8 @@
 "use client";
 
 import { useState } from "react";
-import type { Exercise } from "@/lib/types";
+import type { Exercise, ExerciseUnit } from "@/lib/types";
+import { UNIT_OPTIONS } from "@/lib/types";
 
 interface ExerciseFormProps {
   exercise?: Exercise;
@@ -15,6 +16,7 @@ export default function ExerciseForm({ exercise, routineId, onSave, onCancel }: 
   const [name, setName] = useState(exercise?.name || "");
   const [sets, setSets] = useState(exercise?.sets || 3);
   const [reps, setReps] = useState(exercise?.reps || "10");
+  const [unit, setUnit] = useState<ExerciseUnit>(exercise?.unit || "reps");
   const [targetWeight, setTargetWeight] = useState(exercise?.targetWeight || 0);
   const [notes, setNotes] = useState(exercise?.notes || "");
   const [supersetGroup, setSupersetGroup] = useState(exercise?.supersetGroup || "");
@@ -45,8 +47,10 @@ export default function ExerciseForm({ exercise, routineId, onSave, onCancel }: 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     onSave({
-      id: exerciseId, name, sets, reps, restSeconds: 0, targetWeight, notes, videoType, videoUrl,
-      ...(supersetGroup ? { supersetGroup, supersetLabel } : {}),
+      id: exerciseId, name, sets, reps, unit, restSeconds: 0, targetWeight, notes, videoType, videoUrl,
+      ...(supersetGroup
+        ? { supersetGroup, supersetLabel, supersetRestSeconds: exercise?.supersetRestSeconds }
+        : {}),
     });
   }
 
@@ -64,20 +68,35 @@ export default function ExerciseForm({ exercise, routineId, onSave, onCancel }: 
           placeholder="e.g. Barbell Squat" required className={inputClass} />
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className={`grid gap-3 ${supersetGroup ? "grid-cols-3" : "grid-cols-2 sm:grid-cols-4"}`}>
+        {!supersetGroup && (
+          <div>
+            <label className="block text-sm font-semibold text-[#1A0A1F]/50 mb-1.5">Sets</label>
+            <input type="number" inputMode="numeric" value={sets} onChange={(e) => setSets(Number(e.target.value))} min={1} className={inputClass} />
+          </div>
+        )}
         <div>
-          <label className="block text-sm font-semibold text-[#1A0A1F]/50 mb-1.5">Sets</label>
-          <input type="number" inputMode="numeric" value={sets} onChange={(e) => setSets(Number(e.target.value))} min={1} className={inputClass} />
+          <label className="block text-sm font-semibold text-[#1A0A1F]/50 mb-1.5 capitalize">{unit}</label>
+          <input type="text" value={reps} onChange={(e) => setReps(e.target.value)} placeholder={unit === "reps" ? "8-10" : "e.g. 40"} className={inputClass} />
         </div>
         <div>
-          <label className="block text-sm font-semibold text-[#1A0A1F]/50 mb-1.5">Reps</label>
-          <input type="text" value={reps} onChange={(e) => setReps(e.target.value)} placeholder="8-10" className={inputClass} />
+          <label className="block text-sm font-semibold text-[#1A0A1F]/50 mb-1.5">Measured in</label>
+          <select value={unit} onChange={(e) => setUnit(e.target.value as ExerciseUnit)} className={inputClass}>
+            {UNIT_OPTIONS.map((u) => (
+              <option key={u} value={u}>{u}</option>
+            ))}
+          </select>
         </div>
         <div>
           <label className="block text-sm font-semibold text-[#1A0A1F]/50 mb-1.5">Weight (lbs)</label>
           <input type="number" inputMode="decimal" value={targetWeight || ""} onChange={(e) => setTargetWeight(Number(e.target.value))} min={0} placeholder="0" className={inputClass} />
         </div>
       </div>
+      {supersetGroup && (
+        <p className="text-xs text-[#1A0A1F]/40 -mt-2">
+          Rounds are set once on the superset group in the exercise list.
+        </p>
+      )}
 
       <div>
         <label className="block text-sm font-semibold text-[#1A0A1F]/50 mb-1.5">Notes</label>
@@ -137,7 +156,7 @@ export default function ExerciseForm({ exercise, routineId, onSave, onCancel }: 
           {exercise ? "Save Changes" : "Add Exercise"}
         </button>
         <button type="button" onClick={onCancel}
-          className="bg-white/10 border border-white/10 text-[#1A0A1F]/50 px-6 py-3 rounded-xl font-semibold hover:bg-white/15 transition-colors">
+          className="bg-[#F5F3F4] border border-black/5 text-[#1A0A1F]/50 px-6 py-3 rounded-xl font-semibold hover:bg-[#EAE6E8] transition-colors">
           Cancel
         </button>
       </div>

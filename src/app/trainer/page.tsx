@@ -21,7 +21,7 @@ import {
 } from "@/lib/workoutTemplates";
 import type { Routine, Exercise, DayOfWeek, WorkoutLog, PersonalBest, WorkoutTemplate } from "@/lib/types";
 import { DAYS_OF_WEEK } from "@/lib/types";
-import { groupExercises } from "@/lib/groupExercises";
+import { groupExercises, normalizeExercises } from "@/lib/groupExercises";
 import { matchesQuery } from "@/lib/filterBySearch";
 
 const PB_DEFAULT_LIMIT = 6;
@@ -131,10 +131,22 @@ export default function TrainerPage() {
     const dayExercises = [...(updated.days[selectedDay]?.exercises || [])];
     const idx = dayExercises.findIndex((e) => e.id === exercise.id);
     if (idx >= 0) dayExercises[idx] = exercise; else dayExercises.push(exercise);
-    updated.days[selectedDay] = { exercises: dayExercises };
+    updated.days[selectedDay] = { exercises: normalizeExercises(dayExercises) };
     setActiveRoutine(updated); setShowForm(false); setEditingExercise(undefined);
     setSaving(true); await saveRoutine(updated); setSaving(false);
     showMsg("Exercise saved!");
+  }
+
+  // Update a group-level superset field (rounds or rest) on every member
+  async function handleUpdateSupersetGroup(memberIds: string[], patch: Partial<Pick<Exercise, "sets" | "supersetRestSeconds">>) {
+    if (!activeRoutine) return;
+    const updated = { ...activeRoutine };
+    const dayExercises = (updated.days[selectedDay]?.exercises || []).map((e) =>
+      memberIds.includes(e.id) ? { ...e, ...patch } : e
+    );
+    updated.days[selectedDay] = { exercises: normalizeExercises(dayExercises) };
+    setActiveRoutine(updated);
+    await saveRoutine(updated);
   }
 
   async function handleDeleteExercise(id: string) {
@@ -223,7 +235,7 @@ export default function TrainerPage() {
 
   async function handleApplyTemplate(template: WorkoutTemplate) {
     if (!activeRoutine) return;
-    const copied = exercisesFromTemplate(template);
+    const copied = normalizeExercises(exercisesFromTemplate(template));
     const updated = { ...activeRoutine };
     updated.days[selectedDay] = { exercises: copied };
     setActiveRoutine(updated);
@@ -323,7 +335,7 @@ export default function TrainerPage() {
   return (
     <div className="min-h-screen bg-[#F7F6F0]">
       {/* Header — army green with personal welcome */}
-      <header className="border-b border-[#4A5D23]/10 sticky top-0 z-10 bg-white/95 backdrop-blur-xl relative texture-grain overflow-hidden">
+      <header className="border-b border-[#4A5D23]/10 sticky top-0 z-10 bg-white/95 backdrop-blur-xl texture-grain overflow-hidden safe-top">
         <div className="max-w-4xl mx-auto px-5 py-4 flex items-center justify-between relative">
           <div className="flex items-center gap-3">
             <span className="text-2xl hover-wiggle inline-block cursor-default">🦦</span>
@@ -621,7 +633,7 @@ export default function TrainerPage() {
                             <div className="flex gap-3 mt-1.5 text-sm text-[#1A0A1F]/50">
                               <span className="font-medium">{exercise.sets} sets</span>
                               <span className="text-[#1A0A1F]/20">|</span>
-                              <span className="font-medium">{exercise.reps} reps</span>
+                              <span className="font-medium">{exercise.reps} {exercise.unit || "reps"}</span>
                               {exercise.targetWeight > 0 && (<><span className="text-[#1A0A1F]/20">|</span><span className="font-medium text-[#E8730C]">{exercise.targetWeight} lbs</span></>)}
                             </div>
                             {exercise.notes && <p className="text-sm text-[#1A0A1F]/30 mt-1.5 italic">{exercise.notes}</p>}
@@ -791,14 +803,41 @@ export default function TrainerPage() {
                   globalIdx += group.exercises.length;
 
                   if (isSuperset) {
+                    const memberIds = group.exercises.map((e) => e.id);
                     return (
                       <div key={`group-${gi}`} className="rounded-2xl border border-[#E8730C]/20 bg-white overflow-hidden">
-                        <div className="px-5 pt-4 pb-2 flex items-center justify-between">
+                        <div className="px-5 pt-4 pb-2 flex items-center justify-between gap-3 flex-wrap">
                           <div>
                             {group.label && <p className="font-bold text-[#1A0A1F] text-sm mb-1">{group.label}</p>}
                             <span className="inline-block text-[10px] font-bold uppercase tracking-widest bg-[#E8730C]/10 text-[#E8730C] px-2.5 py-1 rounded-full">Superset</span>
                           </div>
-                          <span className="text-lg font-extrabold text-[#E8730C]">x{group.exercises[0].sets}</span>
+                          {/* Group-level controls: rounds + rest between rounds */}
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-1">
+                              <button onClick={() => handleUpdateSupersetGroup(memberIds, { sets: Math.max(1, group.rounds - 1) })}
+                                disabled={group.rounds <= 1}
+                                className="w-7 h-7 rounded-lg bg-[#F7F6F0] text-[#1A0A1F]/50 hover:text-[#1A0A1F] font-bold disabled:opacity-30 transition-colors"
+                                aria-label="Fewer rounds">−</button>
+                              <span className="text-sm font-extrabold text-[#E8730C] min-w-[70px] text-center">
+                                {group.rounds} round{group.rounds !== 1 ? "s" : ""}
+                              </span>
+                              <button onClick={() => handleUpdateSupersetGroup(memberIds, { sets: group.rounds + 1 })}
+                                className="w-7 h-7 rounded-lg bg-[#F7F6F0] text-[#1A0A1F]/50 hover:text-[#1A0A1F] font-bold transition-colors"
+                                aria-label="More rounds">+</button>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <input type="number" inputMode="numeric" min={0}
+                                key={`rest-${gi}-${group.restBetweenRounds}`}
+                                defaultValue={group.restBetweenRounds || ""}
+                                placeholder="0"
+                                onBlur={(e) => {
+                                  const secs = Math.max(0, Number(e.target.value) || 0);
+                                  if (secs !== group.restBetweenRounds) handleUpdateSupersetGroup(memberIds, { supersetRestSeconds: secs });
+                                }}
+                                className="w-14 px-2 py-1.5 bg-[#F7F6F0] border border-black/5 rounded-lg text-[#1A0A1F] text-sm font-semibold text-center focus:outline-none focus:ring-2 focus:ring-[#4A5D23]" />
+                              <span className="text-xs text-[#1A0A1F]/40 font-medium">s rest</span>
+                            </div>
+                          </div>
                         </div>
                         <div className="border-l-4 border-[#E8730C]/30 ml-4 mr-2 mb-3 space-y-2">
                           {group.exercises.map((exercise, ei) => {
@@ -809,10 +848,16 @@ export default function TrainerPage() {
                                   <span className="flex-shrink-0 w-7 h-7 rounded-md bg-[#4A5D23] text-white flex items-center justify-center text-xs font-bold">{flatIdx + 1}</span>
                                   <div className="flex-1 min-w-0">
                                     <p className="font-semibold text-[#1A0A1F] text-sm">{exercise.name}</p>
-                                    <p className="text-xs text-[#1A0A1F]/40 mt-0.5">{exercise.reps} reps{exercise.targetWeight > 0 ? ` · ${exercise.targetWeight} lbs` : ""}</p>
+                                    <p className="text-xs text-[#1A0A1F]/40 mt-0.5">{exercise.reps} {exercise.unit || "reps"}{exercise.targetWeight > 0 ? ` · ${exercise.targetWeight} lbs` : ""}</p>
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-0.5">
+                                  <button onClick={() => handleMoveExercise(exercise.id, "up")} disabled={ei === 0} className="p-1.5 text-[#1A0A1F]/20 hover:text-[#1A0A1F]/60 rounded disabled:opacity-20 transition-colors">
+                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" /></svg>
+                                  </button>
+                                  <button onClick={() => handleMoveExercise(exercise.id, "down")} disabled={ei === group.exercises.length - 1} className="p-1.5 text-[#1A0A1F]/20 hover:text-[#1A0A1F]/60 rounded disabled:opacity-20 transition-colors">
+                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                                  </button>
                                   <button onClick={() => { setEditingExercise(exercise); setShowForm(true); }} className="p-1.5 text-[#E8730C]/50 hover:text-[#E8730C] rounded transition-colors">
                                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
                                   </button>
@@ -841,7 +886,7 @@ export default function TrainerPage() {
                             <div className="flex gap-3 mt-1.5 text-sm text-[#1A0A1F]/50">
                               <span className="font-medium">{exercise.sets} sets</span>
                               <span className="text-[#1A0A1F]/20">|</span>
-                              <span className="font-medium">{exercise.reps} reps</span>
+                              <span className="font-medium">{exercise.reps} {exercise.unit || "reps"}</span>
                               {exercise.targetWeight > 0 && (<><span className="text-[#1A0A1F]/20">|</span><span className="font-medium text-[#E8730C]">{exercise.targetWeight} lbs</span></>)}
                             </div>
                             {exercise.notes && <p className="text-sm text-[#1A0A1F]/30 mt-1.5 italic">{exercise.notes}</p>}

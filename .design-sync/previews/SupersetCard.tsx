@@ -15,6 +15,8 @@ export const ViewMode = () => (
   <SupersetCard
     label="Pelvic Floor and Core Rehab"
     exercises={exercises}
+    rounds={3}
+    restBetweenRounds={60}
     globalStartIndex={0}
     logData={{}}
     lastSession={{}}
@@ -27,6 +29,8 @@ export const LoggingMode = () => (
   <SupersetCard
     label="Lower Body Circuit"
     exercises={exercises.slice(0, 2)}
+    rounds={3}
+    restBetweenRounds={45}
     globalStartIndex={3}
     loggingMode
     logData={{ "ss-1": [{ setNumber: 1, weight: 0, reps: 10 }] }}

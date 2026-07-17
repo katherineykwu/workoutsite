@@ -231,6 +231,7 @@ export default function WorkoutPage() {
       .map((ex) => ({
         exerciseId: ex.id,
         exerciseName: ex.name,
+        unit: ex.unit,
         sets: logData[ex.id] || [],
         clientNote: noteData[ex.id] || "",
       }));
@@ -259,9 +260,13 @@ export default function WorkoutPage() {
   }
 
   const currentExercises = routine?.days[selectedDay]?.exercises || [];
-  const loggedCount = currentExercises.filter((ex) =>
-    logData[ex.id]?.some((s) => s.weight > 0 || s.reps > 0) || noteData[ex.id]
-  ).length;
+  // An exercise counts as logged only when every set/round is filled in —
+  // for superset members `sets` equals the group's rounds, so a "4 rounds"
+  // workout requires 4 logged sets per exercise, not one-and-done
+  const loggedCount = currentExercises.filter((ex) => {
+    const setsLogged = (logData[ex.id] || []).filter((s) => s.weight > 0 || s.reps > 0).length;
+    return setsLogged >= Math.max(1, ex.sets);
+  }).length;
 
   if (loading) {
     return (
@@ -334,7 +339,7 @@ export default function WorkoutPage() {
               </button>
             </div>
             <h1 className="text-3xl font-bold tracking-tight text-[#49443D] font-display">My Workout <span className="text-2xl hover-pop inline-block cursor-default">🐈‍⬛</span></h1>
-            <p className="text-[#49443D]/30 text-sm mt-1">
+            <p className="text-[#49443D]/30 text-sm mt-2">
               {totalExercises} exercise{totalExercises !== 1 ? "s" : ""} this week
               {(routine.repeatWeeks || 1) > 1 && (
                 <span className="text-[#C4706E] ml-1.5">
@@ -465,6 +470,8 @@ export default function WorkoutPage() {
                       key={`group-${gi}`}
                       label={group.label}
                       exercises={group.exercises}
+                      rounds={group.rounds}
+                      restBetweenRounds={group.restBetweenRounds}
                       globalStartIndex={startIdx}
                       loggingMode={loggingMode}
                       logData={logData}
