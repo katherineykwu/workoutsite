@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { getPublishedRoutine, getAllRoutines, getCurrentWeekMonday, createBlankRoutine } from "@/lib/routines";
+import { getPublishedRoutine, getAllRoutines, getCurrentWeekMonday, createBlankRoutine, shiftWeek } from "@/lib/routines";
 import { getAllLogs, saveWorkoutLog, getPersonalBests } from "@/lib/workoutLogs";
 import type { Routine, DayOfWeek, SetLog, ExerciseLog, WorkoutLog, PersonalBest } from "@/lib/types";
 import { DAYS_OF_WEEK } from "@/lib/types";
@@ -158,52 +158,66 @@ export default function WorkoutPage() {
     });
   }
 
-  function navigateWeek(direction: "prev" | "next") {
-    if (!routine || allRoutines.length === 0) return;
-    const currentIdx = allRoutines.findIndex((r) => r.id === routine.id);
-    // allRoutines is sorted newest first, so "prev" = next index, "next" = prev index
-    const newIdx = direction === "prev" ? currentIdx + 1 : currentIdx - 1;
-    if (newIdx < 0 || newIdx >= allRoutines.length) return;
-    const newRoutine = allRoutines[newIdx];
-    setRoutine(newRoutine);
-    setIsCurrentWeek(coversCurrentWeek(newRoutine));
-    setSelectedDay(getTodayName());
-    setLoggingMode(false);
-    setLogData({});
-    setNoteData({});
-  }
-
-  const canGoPrev = routine && allRoutines.findIndex((r) => r.id === routine.id) < allRoutines.length - 1;
-  const canGoNext = routine && allRoutines.findIndex((r) => r.id === routine.id) > 0;
-
-  // Jump to the current week's routine (or the most recent one if none exists for this week)
-  // Does this routine's week (including repeat weeks) cover the current week?
-  function coversCurrentWeek(r: Routine): boolean {
-    const currentMonday = getCurrentWeekMonday();
-    if (r.weekStart === currentMonday) return true;
+  // Does this routine's week (including repeat weeks) cover the given week?
+  function coversWeek(r: Routine, monday: string): boolean {
+    if (r.weekStart === monday) return true;
     const weeks = r.repeatWeeks || 1;
     if (weeks <= 1) return false;
     const start = new Date(r.weekStart + "T00:00:00");
     const end = new Date(start);
     end.setDate(start.getDate() + weeks * 7);
-    const current = new Date(currentMonday + "T00:00:00");
-    return current >= start && current < end;
+    const target = new Date(monday + "T00:00:00");
+    return target >= start && target < end;
   }
 
-  function jumpToCurrent() {
-    const currentMonday = getCurrentWeekMonday();
-    // Use the routine published for this week (or one that repeats into it);
-    // otherwise show the actual current week as a blank week of rest days
-    const target =
-      allRoutines.find((r) => r.weekStart === currentMonday) ||
-      allRoutines.find((r) => coversCurrentWeek(r)) ||
-      createBlankRoutine(currentMonday);
+  function coversCurrentWeek(r: Routine): boolean {
+    return coversWeek(r, getCurrentWeekMonday());
+  }
+
+  // The routine to display for a given week — an exact match first, then one
+  // that repeats into it, otherwise a blank week of rest days
+  function routineForWeek(monday: string): Routine {
+    return (
+      allRoutines.find((r) => r.weekStart === monday) ||
+      allRoutines.find((r) => coversWeek(r, monday)) ||
+      createBlankRoutine(monday)
+    );
+  }
+
+  function showWeek(target: Routine) {
     setRoutine(target);
-    setIsCurrentWeek(true);
+    setIsCurrentWeek(coversCurrentWeek(target));
     setSelectedDay(getTodayName());
     setLoggingMode(false);
     setLogData({});
     setNoteData({});
+  }
+
+  // Step through calendar weeks, not through the list of published routines —
+  // weeks with no routine show as rest days instead of being skipped. A
+  // repeating routine is one block: "next" jumps past its last repeat week.
+  function navigateWeek(direction: "prev" | "next") {
+    if (!routine) return;
+    const target =
+      direction === "prev"
+        ? shiftWeek(routine.weekStart, -1)
+        : shiftWeek(routine.weekStart, routine.repeatWeeks || 1);
+    showWeek(routineForWeek(target));
+  }
+
+  // Furthest week reachable going forward: the current week, or the newest
+  // published routine's week if the trainer has published ahead
+  const newestWeek = allRoutines.length > 0 && allRoutines[0].weekStart > getCurrentWeekMonday()
+    ? allRoutines[0].weekStart
+    : getCurrentWeekMonday();
+  const earliestWeek = allRoutines.length > 0 ? allRoutines[allRoutines.length - 1].weekStart : null;
+  const canGoPrev = !!routine && earliestWeek !== null && routine.weekStart > earliestWeek;
+  const canGoNext = !!routine && shiftWeek(routine.weekStart, routine.repeatWeeks || 1) <= newestWeek;
+
+  function jumpToCurrent() {
+    // Use the routine published for this week (or one that repeats into it);
+    // otherwise show the actual current week as a blank week of rest days
+    showWeek(routineForWeek(getCurrentWeekMonday()));
   }
 
   async function handleSaveEquipment(equipment: string[], photos: string[]) {
