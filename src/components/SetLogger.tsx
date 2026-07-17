@@ -5,17 +5,19 @@ interface SetLoggerProps {
   setNumber: number;
   weight: number;
   reps: number;
+  unit?: string; // what the count field measures — "reps" (default), "yards", "seconds", ...
+  setLabel?: string; // row label word — "Set" (default) or "Round" for superset members
   placeholderWeight?: number;
   placeholderReps?: number;
   onChange: (weight: number, reps: number) => void;
 }
 
 export default function SetLogger({
-  setNumber, weight, reps, placeholderWeight, placeholderReps, onChange,
+  setNumber, weight, reps, unit = "reps", setLabel = "Set", placeholderWeight, placeholderReps, onChange,
 }: SetLoggerProps) {
   return (
     <div className="flex items-center gap-2">
-      <span className="text-xs font-bold text-[#49443D]/30 w-12 shrink-0">Set {setNumber}</span>
+      <span className="text-xs font-bold text-[#49443D]/30 w-14 shrink-0">{setLabel} {setNumber}</span>
       <div className="flex-1 flex gap-2">
         <div className="relative flex-1">
           <input
@@ -39,7 +41,7 @@ export default function SetLogger({
             min={0}
             className="w-full px-3 py-2.5 bg-[#F5F0E8] border border-black/5 rounded-xl text-[#49443D] text-sm font-semibold placeholder-[#49443D]/25 focus:outline-none focus:ring-2 focus:ring-[#C4706E] focus:border-transparent text-center"
           />
-          <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-[#49443D]/30 font-medium">reps</span>
+          <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-[#49443D]/30 font-medium">{unit}</span>
         </div>
       </div>
     </div>

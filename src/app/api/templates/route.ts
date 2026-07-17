@@ -1,9 +1,15 @@
 // API route: GET, POST, and DELETE /api/templates — workout templates
 import { NextRequest, NextResponse } from "next/server";
 import { getData, setData } from "@/lib/store";
+import { normalizeExercises } from "@/lib/groupExercises";
 import type { WorkoutTemplate } from "@/lib/types";
 
 const STORE_KEY = "workout-templates";
+
+// Same invariant enforcement as /api/routines — see normalizeExercises
+function normalizeTemplate(template: WorkoutTemplate): WorkoutTemplate {
+  return { ...template, exercises: normalizeExercises(template.exercises || []) };
+}
 export const dynamic = "force-dynamic";
 
 const NO_CACHE_HEADERS = {
@@ -24,14 +30,14 @@ async function writeTemplates(templates: WorkoutTemplate[]): Promise<void> {
 
 // GET /api/templates — list all templates, newest first
 export async function GET() {
-  const templates = await readTemplates();
+  const templates = (await readTemplates()).map(normalizeTemplate);
   templates.sort((a, b) => b.updatedAt - a.updatedAt);
   return NextResponse.json(templates, { headers: NO_CACHE_HEADERS });
 }
 
 // POST /api/templates — upsert by id
 export async function POST(request: NextRequest) {
-  const template: WorkoutTemplate = await request.json();
+  const template: WorkoutTemplate = normalizeTemplate(await request.json());
   const templates = await readTemplates();
 
   const index = templates.findIndex((t) => t.id === template.id);

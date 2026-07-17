@@ -72,6 +72,12 @@ input[type="number"] {
   padding-bottom: calc(1rem + env(safe-area-inset-bottom));
 }
 
+/* Sticky top headers should clear the iPhone notch/status bar — body-level
+   safe-area padding doesn't protect a sticky element once it pins to top:0 */
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
 /* Display font for headings — Fraunces variable serif.
    Use opsz 48 at large sizes for beautiful high-contrast strokes,
    SOFT 50 for gently softened terminals (warm but not cute). */

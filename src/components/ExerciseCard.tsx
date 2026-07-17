@@ -48,11 +48,11 @@ export default function ExerciseCard({
             <div className="flex flex-wrap gap-2 mt-3">
               <div className="flex items-center gap-1.5 bg-[#F5F0E8] text-[#49443D]/70 px-3 py-1.5 rounded-lg">
                 <span className="text-sm font-bold">{exercise.sets}</span>
-                <span className="text-xs text-[#49443D]/40">sets</span>
+                <span className="text-xs text-[#49443D]/40">{compact ? "rounds" : "sets"}</span>
               </div>
               <div className="flex items-center gap-1.5 bg-[#F5F0E8] text-[#49443D]/70 px-3 py-1.5 rounded-lg">
                 <span className="text-sm font-bold">{exercise.reps}</span>
-                <span className="text-xs text-[#49443D]/40">reps</span>
+                <span className="text-xs text-[#49443D]/40">{exercise.unit || "reps"}</span>
               </div>
               {exercise.targetWeight > 0 && (
                 <div className="flex items-center gap-1.5 bg-[#C4706E]/8 text-[#C4706E] px-3 py-1.5 rounded-lg">
@@ -92,6 +92,8 @@ export default function ExerciseCard({
                       setNumber={setNum}
                       weight={current?.weight || 0}
                       reps={current?.reps || 0}
+                      unit={exercise.unit}
+                      setLabel={compact ? "Round" : "Set"}
                       placeholderWeight={last?.weight}
                       placeholderReps={last?.reps}
                       onChange={(w, r) => onSetChange(exercise.id, setNum, w, r)}

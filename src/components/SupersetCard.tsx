@@ -7,6 +7,8 @@ import ExerciseCard from "./ExerciseCard";
 interface SupersetCardProps {
   label: string;
   exercises: Exercise[];
+  rounds: number;
+  restBetweenRounds: number;
   globalStartIndex: number;
   loggingMode?: boolean;
   logData: Record<string, SetLog[]>;
@@ -18,12 +20,18 @@ interface SupersetCardProps {
 }
 
 export default function SupersetCard({
-  label, exercises, globalStartIndex,
+  label, exercises, rounds, restBetweenRounds, globalStartIndex,
   loggingMode, logData, lastSession, personalBests, noteData,
   onSetChange, onNoteChange,
 }: SupersetCardProps) {
-  // Round count from the first exercise's sets field
-  const rounds = exercises[0]?.sets || 1;
+  // A round is complete once every member has that many sets logged
+  const completedRounds = Math.min(
+    ...exercises.map(
+      (ex) => (logData[ex.id] || []).filter((s) => s.weight > 0 || s.reps > 0).length
+    )
+  );
+  const allDone = completedRounds >= rounds;
+  const currentRound = Math.min(rounds, completedRounds + 1);
 
   return (
     <div className="rounded-3xl border border-[#C4706E]/15 bg-[#FFFDF9] overflow-hidden shadow-playful">
@@ -36,9 +44,16 @@ export default function SupersetCard({
           <span className="inline-block text-[10px] font-bold uppercase tracking-widest bg-[#C4706E]/15 text-[#C4706E] px-3 py-1 rounded-full font-display">
             Superset
           </span>
+          {restBetweenRounds > 0 && (
+            <span className="ml-2 inline-block text-[10px] font-semibold text-[#49443D]/40">
+              rest {restBetweenRounds}s between rounds
+            </span>
+          )}
         </div>
-        <span className="text-lg font-bold text-[#C4706E] font-display">
-          x{rounds}
+        <span className="text-lg font-bold text-[#C4706E] font-display whitespace-nowrap">
+          {loggingMode
+            ? allDone ? "All rounds done! 🎉" : `Round ${currentRound} of ${rounds}`
+            : `x${rounds}`}
         </span>
       </div>
 
