@@ -74,6 +74,16 @@ export function getCurrentWeekMonday(): string {
   return `${y}-${m}-${d}`;
 }
 
+// Shift an ISO week-start date by a number of weeks (local time)
+export function shiftWeek(weekStart: string, deltaWeeks: number): string {
+  const d = new Date(weekStart + "T00:00:00");
+  d.setDate(d.getDate() + deltaWeeks * 7);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
 // Create a new blank routine for a given week
 export function createBlankRoutine(weekStart: string): Routine {
   return {
